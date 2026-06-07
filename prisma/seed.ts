@@ -760,60 +760,74 @@ async function main() {
   renewalDate30.setDate(renewalDate30.getDate() + 30);
 
   // Guest 1 - STANDARD subscription (15 coupons)
-  const sub1 = await prisma.subscription.upsert({
-    where: { id: "sub-john-standard" },
-    update: {},
-    create: {
-      id: "sub-john-standard",
-      userId: guest1.id,
-      package: "STANDARD",
-      creditsTotal: 15,
-      creditsUsed: 4,
-      creditsRemaining: 11,
-      startDate: now,
-      renewalDate: renewalDate30,
-      status: "ACTIVE",
-      paymentRef: "MPESA-255700222001-1700000000000",
-    },
-  });
+  // Use findFirst + create to handle existing subscription for this userId
+  let sub1 = await prisma.subscription.findFirst({ where: { userId: guest1.id } });
+  if (!sub1) {
+    sub1 = await prisma.subscription.create({
+      data: {
+        userId: guest1.id,
+        package: "STANDARD",
+        creditsTotal: 15,
+        creditsUsed: 4,
+        creditsRemaining: 11,
+        startDate: now,
+        renewalDate: renewalDate30,
+        status: "ACTIVE",
+        paymentRef: "MPESA-255700222001-1700000000000",
+      },
+    });
+  } else {
+    // Update existing subscription to match demo data
+    sub1 = await prisma.subscription.update({
+      where: { id: sub1.id },
+      data: {
+        package: "STANDARD",
+        creditsTotal: 15,
+        creditsUsed: 4,
+        creditsRemaining: 11,
+        renewalDate: renewalDate30,
+        status: "ACTIVE",
+      },
+    });
+  }
   console.log("Subscription 1 created:", sub1.package);
 
   // Guest 2 - PREMIUM subscription (999 = unlimited)
-  const sub2 = await prisma.subscription.upsert({
-    where: { id: "sub-sarah-premium" },
-    update: {},
-    create: {
-      id: "sub-sarah-premium",
-      userId: guest2.id,
-      package: "PREMIUM",
-      creditsTotal: 999,
-      creditsUsed: 8,
-      creditsRemaining: 991,
-      startDate: now,
-      renewalDate: renewalDate30,
-      status: "ACTIVE",
-      paymentRef: "MPESA-254700333002-1700000000001",
-    },
-  });
+  let sub2 = await prisma.subscription.findFirst({ where: { userId: guest2.id } });
+  if (!sub2) {
+    sub2 = await prisma.subscription.create({
+      data: {
+        userId: guest2.id,
+        package: "PREMIUM",
+        creditsTotal: 999,
+        creditsUsed: 8,
+        creditsRemaining: 991,
+        startDate: now,
+        renewalDate: renewalDate30,
+        status: "ACTIVE",
+        paymentRef: "MPESA-254700333002-1700000000001",
+      },
+    });
+  }
   console.log("Subscription 2 created:", sub2.package);
 
   // Guest 3 - STARTER subscription (5 coupons)
-  const sub3 = await prisma.subscription.upsert({
-    where: { id: "sub-david-starter" },
-    update: {},
-    create: {
-      id: "sub-david-starter",
-      userId: guest3.id,
-      package: "STARTER",
-      creditsTotal: 5,
-      creditsUsed: 2,
-      creditsRemaining: 3,
-      startDate: now,
-      renewalDate: renewalDate30,
-      status: "ACTIVE",
-      paymentRef: "MPESA-256700444003-1700000000002",
-    },
-  });
+  let sub3 = await prisma.subscription.findFirst({ where: { userId: guest3.id } });
+  if (!sub3) {
+    sub3 = await prisma.subscription.create({
+      data: {
+        userId: guest3.id,
+        package: "STARTER",
+        creditsTotal: 5,
+        creditsUsed: 2,
+        creditsRemaining: 3,
+        startDate: now,
+        renewalDate: renewalDate30,
+        status: "ACTIVE",
+        paymentRef: "MPESA-256700444003-1700000000002",
+      },
+    });
+  }
   console.log("Subscription 3 created:", sub3.package);
 
   // ==========================================
