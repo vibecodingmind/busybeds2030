@@ -1,24 +1,30 @@
 ---
 Task ID: 1
 Agent: Main Agent
-Task: End-to-end testing of the complete BusyBeds platform
+Task: Fix pages missing headers + add demo data for BusyBeds
 
 Work Log:
-- Explored project structure: Next.js 16, SQLite/Prisma, NextAuth v4, 14 API routes, 14 pages
-- Set up test environment: Node.js fetch-based test framework with custom CookieJar
-- Created test seed data with 7 users (admin, hotel staff, 4 guest types), 3 hotels, 20+ coupons
-- Wrote comprehensive API integration test suite (121 tests across 10 categories)
-- Ran tests iteratively, found and fixed 5 bugs
-- Re-seeded database between test runs for clean state
-- All 121 tests now pass (100% pass rate)
+- Investigated all 17 page routes and found /coupons, /bookings, /subscription had NO navigation/header
+- Root cause: Navbar hides on these routes but they didn't have dashboard layout with sidebar
+- Created shared DashboardShell component (src/components/dashboard-shell.tsx)
+- Added layout.tsx for /coupons, /bookings, /subscription using DashboardShell
+- Simplified dashboard/layout.tsx to use shared DashboardShell
+- Hidden Navbar on /login and /register pages (they have their own branding)
+- Enhanced seed.ts with 8 hotels across East Africa (Tanzania, Kenya, Uganda)
+- Added 4 guest users (STANDARD, PREMIUM, STARTER, no subscription)
+- Added 8 hotel staff accounts (one per hotel)
+- Added coupons in all statuses: AVAILABLE, RESERVED, CONFIRMED, REDEEMED, CANCELLED, EXPIRED, NO_SHOW
+- Added commission records and notifications
+- Fixed next.config.ts to support BUILD_DIR env var for zero-downtime staging builds
+- Fixed deploy.sh to use BUILD_DIR env var instead of --config flag
+- Fixed seed.ts to handle existing subscriptions (findFirst + create instead of upsert with custom IDs)
+- Cleaned up duplicate hotels from old seed data
+- Deployed to live site successfully
+- Ran seed on live database successfully
 
 Stage Summary:
-- 121 tests written and passing across 10 categories
-- 5 bugs found and fixed:
-  1. SQLite mode:insensitive filter not supported (hotels/route.ts)
-  2. Guest blocked from cancel API by middleware (middleware.ts)
-  3. Subscription GET only returns ACTIVE subs (subscription/route.ts)
-  4. Hotel bookings response key mismatch (test fix)
-  5. Admin dashboard stats nested under stats object (test fix)
-- Test report PDF generated at /home/z/my-project/download/BusyBeds_Test_Report.pdf
-- Test script at /home/z/my-project/tests/api.test.ts
+- All pages now have proper headers/navigation (sidebar on desktop, mobile header + bottom nav)
+- 8 demo hotels across 3 East African countries
+- 13 demo users (1 admin, 4 guests, 8 hotel staff)
+- 42 coupons in varied statuses for realistic testing
+- Live site: https://busybeds.com - all working
