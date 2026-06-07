@@ -1,8 +1,8 @@
 module.exports = {
   apps: [{
     name: 'busybeds',
-    script: '.next/standalone/server.js',
-    cwd: '/var/www/busybeds',
+    script: 'server.js',
+    cwd: '/var/www/busybeds/.next/standalone',
     env: {
       NODE_ENV: 'production',
       PORT: 3008,

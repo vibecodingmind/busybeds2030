@@ -56,9 +56,20 @@ BUILD_DIR=./.next-staging npx next build
 
 # Copy static files and prisma into standalone staging
 echo "[6/8] Preparing staging standalone..."
-# Remove incomplete static dir in standalone first, then copy fresh
+# Remove incomplete dirs in standalone first, then copy fresh
 rm -rf .next-staging/standalone/.next/static 2>/dev/null || true
+rm -rf .next-staging/standalone/.next/server 2>/dev/null || true
+rm -rf .next-staging/standalone/.next/build 2>/dev/null || true
+
+# Copy all required build files into standalone .next directory
 cp -r .next-staging/static .next-staging/standalone/.next/ 2>/dev/null || true
+cp -r .next-staging/server .next-staging/standalone/.next/ 2>/dev/null || true
+cp -r .next-staging/build .next-staging/standalone/.next/ 2>/dev/null || true
+cp .next-staging/BUILD_ID .next-staging/standalone/.next/ 2>/dev/null || true
+cp .next-staging/build-manifest.json .next-staging/standalone/.next/ 2>/dev/null || true
+cp .next-staging/app-path-routes-manifest.json .next-staging/standalone/.next/ 2>/dev/null || true
+cp .next-staging/prerender-manifest.json .next-staging/standalone/.next/ 2>/dev/null || true
+cp .next-staging/routes-manifest.json .next-staging/standalone/.next/ 2>/dev/null || true
 cp -r public .next-staging/standalone/ 2>/dev/null || true
 cp -r prisma .next-staging/standalone/ 2>/dev/null || true
 
@@ -98,7 +109,8 @@ mv .next-staging .next
 
 # Restart PM2 immediately
 echo "[8/8] Restarting application..."
-pm2 restart $APP_NAME --update-env 2>/dev/null || pm2 start ecosystem.config.js --update-env
+pm2 delete $APP_NAME 2>/dev/null || true
+pm2 start ecosystem.config.js --update-env 2>/dev/null || pm2 start ecosystem.config.js
 pm2 save
 
 # ============================================================
