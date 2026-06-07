@@ -20,17 +20,17 @@ export async function POST(request: NextRequest) {
     }
 
     const body = await request.json();
-    const { couponId } = body;
+    const { code } = body;
 
-    if (!couponId) {
+    if (!code) {
       return NextResponse.json(
-        { error: "Coupon ID is required" },
+        { error: "Coupon code is required" },
         { status: 400 }
       );
     }
 
     const coupon = await db.coupon.findUnique({
-      where: { id: couponId },
+      where: { code },
     });
 
     if (!coupon) {
@@ -57,7 +57,7 @@ export async function POST(request: NextRequest) {
     }
 
     const updatedCoupon = await db.coupon.update({
-      where: { id: couponId },
+      where: { id: coupon.id },
       data: {
         status: "CONFIRMED",
         confirmedAt: new Date(),

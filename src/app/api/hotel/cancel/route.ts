@@ -14,17 +14,17 @@ export async function POST(request: NextRequest) {
     const userRole = (session.user as { role: string }).role;
 
     const body = await request.json();
-    const { couponId, cancelReason } = body;
+    const { code, cancelReason } = body;
 
-    if (!couponId) {
+    if (!code) {
       return NextResponse.json(
-        { error: "Coupon ID is required" },
+        { error: "Coupon code is required" },
         { status: 400 }
       );
     }
 
     const coupon = await db.coupon.findUnique({
-      where: { id: couponId },
+      where: { code },
       include: { subscription: true },
     });
 
@@ -85,7 +85,7 @@ export async function POST(request: NextRequest) {
 
     // Update coupon
     const updatedCoupon = await db.coupon.update({
-      where: { id: couponId },
+      where: { id: coupon.id },
       data: {
         status: "CANCELLED",
         cancelledAt: new Date(),
