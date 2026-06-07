@@ -1,7 +1,7 @@
 'use client'
 
 import { useState, useEffect } from 'react'
-import { useRouter } from 'next/navigation'
+import { useRouter, useSearchParams } from 'next/navigation'
 import { useSession } from 'next-auth/react'
 import {
   Check,
@@ -132,25 +132,53 @@ export default function SubscriptionPage() {
 
     setProcessing(true)
     try {
-      const res = await fetch('/api/subscription', {
+      // Call the PesaPal payment initiation endpoint
+      const res = await fetch('/api/payment/initiate', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
-          package: selectedPlan,
-          paymentRef: `MPESA-${phoneNumber}-${Date.now()}`,
+          packageName: selectedPlan,
+          phoneNumber,
         }),
       })
 
       const data = await res.json()
 
       if (!res.ok) {
-        toast.error(data.error || 'Failed to create subscription')
+        toast.error(data.error || 'Failed to initiate payment')
         return
       }
 
-      toast.success('Subscription created successfully!')
-      setDrawerOpen(false)
-      router.push('/dashboard')
+      // Redirect user to PesaPal payment URL
+      if (data.redirectUrl) {
+        toast.success('Redirecting to PesaPal for payment...')
+        setDrawerOpen(false)
+        window.location.href = data.redirectUrl
+      } else if (data.simulated) {
+        // Fallback for when PesaPal is not configured (dev/sandbox mode)
+        toast.success('Payment initiated (simulation mode). Completing subscription...')
+        setDrawerOpen(false)
+
+        // For simulated payments, create subscription directly
+        const subRes = await fetch('/api/subscription', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            package: selectedPlan,
+            paymentRef: data.orderTrackingId,
+          }),
+        })
+
+        const subData = await subRes.json()
+        if (subRes.ok) {
+          toast.success('Subscription created successfully!')
+          router.push('/dashboard')
+        } else {
+          toast.error(subData.error || 'Failed to create subscription')
+        }
+      } else {
+        toast.error('No payment URL received. Please try again.')
+      }
     } catch {
       toast.error('Something went wrong. Please try again.')
     } finally {
@@ -353,7 +381,7 @@ export default function SubscriptionPage() {
                 Complete Payment
               </DrawerTitle>
               <DrawerDescription>
-                Pay via M-Pesa for your {selectedPlan} subscription
+                Pay via PesaPal for your {selectedPlan} subscription
               </DrawerDescription>
             </DrawerHeader>
 
@@ -370,7 +398,7 @@ export default function SubscriptionPage() {
                   htmlFor="phone"
                   className="text-sm font-medium text-[#0A1628]"
                 >
-                  M-Pesa Phone Number
+                  Phone Number for Payment
                 </label>
                 <div className="flex items-center gap-2">
                   <Phone className="h-4 w-4 text-gray-400" />
@@ -384,14 +412,14 @@ export default function SubscriptionPage() {
                   />
                 </div>
                 <p className="text-xs text-gray-400">
-                  You will receive an M-Pesa prompt on this number
+                  You will be redirected to PesaPal to complete payment securely
                 </p>
               </div>
 
-              <div className="glass-white rounded-lg border border-amber-200 bg-amber-50/50 p-3">
-                <p className="text-xs text-amber-700">
-                  This is a simulated payment. In production, you would receive an
-                  M-Pesa STK push notification.
+              <div className="glass-white rounded-lg border border-blue-200 bg-blue-50/50 p-3">
+                <p className="text-xs text-blue-700">
+                  You will be redirected to PesaPal&apos;s secure payment page.
+                  M-Pesa, bank cards, and mobile money are accepted.
                 </p>
               </div>
             </div>
@@ -405,10 +433,10 @@ export default function SubscriptionPage() {
                 {processing ? (
                   <>
                     <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                    Processing...
+                    Initiating Payment...
                   </>
                 ) : (
-                  'Pay Now'
+                  'Proceed to Payment'
                 )}
               </Button>
               <DrawerClose asChild>

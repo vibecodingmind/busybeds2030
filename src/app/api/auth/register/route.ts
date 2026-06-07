@@ -1,6 +1,8 @@
 import { NextRequest, NextResponse } from "next/server";
 import bcrypt from "bcryptjs";
+import crypto from "crypto";
 import { db } from "@/lib/db";
+import { sendVerificationEmail } from "@/lib/email";
 
 function sanitizeHtml(input: string): string {
   return input
@@ -59,6 +61,10 @@ export async function POST(request: NextRequest) {
 
     const passwordHash = await bcrypt.hash(password, 12);
 
+    // Generate verification token
+    const verifyToken = crypto.randomBytes(32).toString("hex");
+    const verifyTokenExpiry = new Date(Date.now() + 24 * 60 * 60 * 1000); // 24 hours
+
     const user = await db.user.create({
       data: {
         name,
@@ -66,8 +72,18 @@ export async function POST(request: NextRequest) {
         passwordHash,
         phone,
         role: "GUEST",
+        verifyToken,
+        verifyTokenExpiry,
       },
     });
+
+    // Send verification email (logs to console if SMTP not configured)
+    try {
+      await sendVerificationEmail(email, verifyToken);
+    } catch (emailError) {
+      console.error("Failed to send verification email:", emailError);
+      // Don't fail registration if email sending fails
+    }
 
     return NextResponse.json(
       {
@@ -75,6 +91,8 @@ export async function POST(request: NextRequest) {
         name: user.name,
         email: user.email,
         role: user.role,
+        message:
+          "Registration successful. Please check your email to verify your account.",
       },
       { status: 201 }
     );
@@ -86,4 +104,3 @@ export async function POST(request: NextRequest) {
     );
   }
 }
-

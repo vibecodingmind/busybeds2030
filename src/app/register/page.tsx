@@ -3,7 +3,7 @@
 import { useState } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
-import { BedDouble, Eye, EyeOff, Loader2 } from "lucide-react";
+import { BedDouble, Eye, EyeOff, Loader2, Mail, CheckCircle2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -16,6 +16,9 @@ export default function RegisterPage() {
   const [showPassword, setShowPassword] = useState(false);
   const [showConfirm, setShowConfirm] = useState(false);
   const [termsAccepted, setTermsAccepted] = useState(false);
+  const [registrationSuccess, setRegistrationSuccess] = useState(false);
+  const [registeredEmail, setRegisteredEmail] = useState("");
+  const [resendLoading, setResendLoading] = useState(false);
 
   const [form, setForm] = useState({
     name: "",
@@ -64,12 +67,37 @@ export default function RegisterPage() {
         toast.error(data.error || "Registration failed");
         return;
       }
-      toast.success("Account created! Please log in.");
-      router.push("/login?registered=true");
+
+      // Show success message asking user to verify email
+      setRegisteredEmail(form.email);
+      setRegistrationSuccess(true);
+      toast.success("Account created! Please check your email to verify your account.");
     } catch {
       toast.error("Something went wrong. Please try again.");
     } finally {
       setLoading(false);
+    }
+  };
+
+  const handleResendVerification = async () => {
+    if (!registeredEmail) return;
+    setResendLoading(true);
+    try {
+      const res = await fetch("/api/auth/resend-verification", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ email: registeredEmail }),
+      });
+      const data = await res.json();
+      if (res.status === 429) {
+        toast.error(data.error || "Please wait before requesting another email");
+      } else {
+        toast.success("Verification email resent! Check your inbox.");
+      }
+    } catch {
+      toast.error("Failed to resend verification email");
+    } finally {
+      setResendLoading(false);
     }
   };
 
@@ -83,6 +111,67 @@ export default function RegisterPage() {
       });
     }
   };
+
+  // Show success state after registration
+  if (registrationSuccess) {
+    return (
+      <div className="relative flex min-h-[calc(100vh-64px)] items-center justify-center overflow-hidden bg-glass-gradient px-4 py-8">
+        <div className="pointer-events-none absolute -top-32 right-1/4 h-96 w-96 rounded-full bg-[#C9A84C]/10 blur-[100px] float" />
+        <div className="pointer-events-none absolute -bottom-32 left-1/4 h-80 w-80 rounded-full bg-[#C9A84C]/8 blur-[80px] float" style={{ animationDelay: "2s" }} />
+
+        <div className="relative z-10 w-full max-w-md">
+          <div className="mb-8 text-center">
+            <span className="inline-flex items-center gap-2.5">
+              <BedDouble className="h-7 w-7 text-[#C9A84C] drop-shadow-[0_0_12px_rgba(201,168,76,0.4)]" />
+              <span className="text-xl font-bold text-[#C9A84C] drop-shadow-[0_0_20px_rgba(201,168,76,0.3)]">
+                BusyBeds
+              </span>
+            </span>
+          </div>
+
+          <div className="glass-card-dark rounded-2xl p-8 text-center">
+            <CheckCircle2 className="mx-auto h-16 w-16 text-green-400" />
+            <h1 className="mt-4 text-2xl font-bold text-white">
+              Check Your Email
+            </h1>
+            <p className="mt-2 text-sm text-white/50">
+              We&apos;ve sent a verification email to
+            </p>
+            <p className="mt-1 text-sm font-medium text-[#C9A84C]">
+              {registeredEmail}
+            </p>
+            <p className="mt-4 text-sm text-white/50">
+              Please click the link in the email to verify your account before logging in.
+              The link expires in 24 hours.
+            </p>
+
+            <div className="mt-6 space-y-3">
+              <Button
+                variant="outline"
+                className="w-full border-white/10 text-white/70 hover:bg-white/5 hover:text-white"
+                onClick={handleResendVerification}
+                disabled={resendLoading}
+              >
+                {resendLoading ? (
+                  <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                ) : (
+                  <Mail className="mr-2 h-4 w-4" />
+                )}
+                Resend Verification Email
+              </Button>
+
+              <Button
+                className="w-full shimmer-gold text-[#0A1628] hover:bg-[#C9A84C]/90"
+                onClick={() => router.push("/login")}
+              >
+                Go to Login
+              </Button>
+            </div>
+          </div>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="relative flex min-h-[calc(100vh-64px)] items-center justify-center overflow-hidden bg-glass-gradient px-4 py-8">

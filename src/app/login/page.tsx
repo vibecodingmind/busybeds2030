@@ -12,10 +12,18 @@ import {
   Building2,
   User,
   Loader2,
+  KeyRound,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+  DialogDescription,
+} from "@/components/ui/dialog";
 import { toast } from "sonner";
 
 const demoAccounts = [
@@ -49,6 +57,12 @@ function LoginForm() {
   const [demoLoading, setDemoLoading] = useState<string | null>(null);
   const [showPassword, setShowPassword] = useState(false);
 
+  // Forgot password dialog state
+  const [forgotDialogOpen, setForgotDialogOpen] = useState(false);
+  const [forgotEmail, setForgotEmail] = useState("");
+  const [forgotLoading, setForgotLoading] = useState(false);
+  const [forgotSent, setForgotSent] = useState(false);
+
   const [form, setForm] = useState({
     email: "",
     password: "",
@@ -58,7 +72,18 @@ function LoginForm() {
 
   useEffect(() => {
     if (searchParams.get("registered") === "true") {
-      toast.success("Account created successfully! Please log in.");
+      toast.success("Account created successfully! Please check your email to verify your account before logging in.");
+    }
+    if (searchParams.get("verified") === "true") {
+      toast.success("Email verified successfully! You can now log in.");
+    }
+    const error = searchParams.get("error");
+    if (error === "missing-token") {
+      toast.error("Verification link is invalid. Please request a new one.");
+    } else if (error === "invalid-or-expired-token") {
+      toast.error("Verification link has expired. Please request a new one.");
+    } else if (error === "verification-failed") {
+      toast.error("Email verification failed. Please try again.");
     }
   }, [searchParams]);
 
@@ -81,7 +106,7 @@ function LoginForm() {
       });
 
       if (result?.error) {
-        toast.error("Invalid email or password. Please try again.");
+        toast.error(result.error || "Invalid email or password. Please try again.");
         return;
       }
 
@@ -115,6 +140,30 @@ function LoginForm() {
     setDemoLoading(account.label);
     await handleLogin(account.email, account.password);
     setDemoLoading(null);
+  };
+
+  const handleForgotPassword = async () => {
+    if (!forgotEmail.trim() || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(forgotEmail)) {
+      toast.error("Please enter a valid email address");
+      return;
+    }
+
+    setForgotLoading(true);
+    try {
+      const res = await fetch("/api/auth/forgot-password", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ email: forgotEmail }),
+      });
+
+      const data = await res.json();
+      setForgotSent(true);
+      toast.success(data.message || "If that email exists, we've sent a reset link.");
+    } catch {
+      toast.error("Something went wrong. Please try again.");
+    } finally {
+      setForgotLoading(false);
+    }
   };
 
   const updateField = (field: string, value: string) => {
@@ -176,9 +225,22 @@ function LoginForm() {
 
             {/* Password */}
             <div className="space-y-2">
-              <Label htmlFor="password" className="text-white/70">
-                Password
-              </Label>
+              <div className="flex items-center justify-between">
+                <Label htmlFor="password" className="text-white/70">
+                  Password
+                </Label>
+                <button
+                  type="button"
+                  onClick={() => {
+                    setForgotDialogOpen(true);
+                    setForgotSent(false);
+                    setForgotEmail(form.email || "");
+                  }}
+                  className="text-xs text-[#C9A84C] hover:text-[#d4b96a] transition-colors"
+                >
+                  Forgot password?
+                </button>
+              </div>
               <div className="relative">
                 <Input
                   id="password"
@@ -272,6 +334,74 @@ function LoginForm() {
           </div>
         </div>
       </div>
+
+      {/* Forgot Password Dialog */}
+      <Dialog open={forgotDialogOpen} onOpenChange={setForgotDialogOpen}>
+        <DialogContent className="glass-card-dark border-white/10 sm:max-w-md">
+          <DialogHeader>
+            <DialogTitle className="flex items-center gap-2 text-white">
+              <KeyRound className="h-5 w-5 text-[#C9A84C]" />
+              Reset Password
+            </DialogTitle>
+            <DialogDescription className="text-white/50">
+              {forgotSent
+                ? "Check your email for a password reset link."
+                : "Enter your email address and we'll send you a link to reset your password."}
+            </DialogDescription>
+          </DialogHeader>
+
+          {!forgotSent ? (
+            <div className="space-y-4 py-2">
+              <div className="space-y-2">
+                <Label htmlFor="forgot-email" className="text-white/70">
+                  Email Address
+                </Label>
+                <Input
+                  id="forgot-email"
+                  type="email"
+                  placeholder="john@example.com"
+                  value={forgotEmail}
+                  onChange={(e) => setForgotEmail(e.target.value)}
+                  className="h-11 rounded-xl border-white/10 bg-white/5 text-white placeholder:text-white/30 focus:border-[#C9A84C]/50 focus:bg-white/10"
+                  disabled={forgotLoading}
+                />
+              </div>
+              <Button
+                className="w-full shimmer-gold text-[#0A1628] hover:bg-[#C9A84C]/90 h-11 font-semibold"
+                onClick={handleForgotPassword}
+                disabled={forgotLoading}
+              >
+                {forgotLoading ? (
+                  <>
+                    <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                    Sending...
+                  </>
+                ) : (
+                  "Send Reset Link"
+                )}
+              </Button>
+            </div>
+          ) : (
+            <div className="py-2">
+              <div className="rounded-lg border border-green-500/20 bg-green-500/10 p-4 text-center">
+                <p className="text-sm text-green-300">
+                  If an account with that email exists, we&apos;ve sent a password reset link.
+                </p>
+                <p className="mt-2 text-xs text-white/40">
+                  Check your inbox and spam folder.
+                </p>
+              </div>
+              <Button
+                variant="outline"
+                className="mt-4 w-full border-white/10 text-white/70 hover:bg-white/5 hover:text-white"
+                onClick={() => setForgotDialogOpen(false)}
+              >
+                Close
+              </Button>
+            </div>
+          )}
+        </DialogContent>
+      </Dialog>
     </div>
   );
 }

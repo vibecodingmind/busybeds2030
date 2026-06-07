@@ -64,15 +64,24 @@ export async function POST(request: NextRequest) {
       },
     });
 
-    // Create notification for guest
-    await db.notification.create({
-      data: {
-        userId: coupon.userId,
-        channel: "IN_APP",
-        message: `Great news! Your booking has been confirmed. Coupon ${coupon.code} is now confirmed.`,
-        status: "PENDING",
-      },
-    });
+    // Send booking confirmation notification (in-app + SMS)
+    try {
+      const { notifyBookingConfirmation } = await import("@/lib/notifications");
+      const hotel = coupon.hotelId
+        ? await db.hotel.findUnique({ where: { id: coupon.hotelId }, select: { name: true } })
+        : null;
+      await notifyBookingConfirmation(
+        coupon.userId,
+        coupon.code,
+        hotel?.name || "your hotel",
+        coupon.checkInDate
+          ? new Date(coupon.checkInDate).toLocaleDateString()
+          : "TBD"
+      );
+    } catch (notifError) {
+      console.error("Failed to send booking confirmation notification:", notifError);
+      // Non-blocking - confirmation is still successful
+    }
 
     return NextResponse.json({ coupon: updatedCoupon });
   } catch (error) {

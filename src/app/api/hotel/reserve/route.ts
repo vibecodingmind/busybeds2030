@@ -97,15 +97,22 @@ export async function POST(request: NextRequest) {
       },
     });
 
-    // Create notification for guest
-    await db.notification.create({
-      data: {
-        userId: coupon.userId,
-        channel: "IN_APP",
-        message: `Your coupon ${code} has been reserved! Check-in: ${checkIn.toLocaleDateString()}. Please complete payment before ${paymentDeadline.toLocaleString()}.`,
-        status: "PENDING",
-      },
-    });
+    // Create notification for guest (in-app + SMS)
+    try {
+      const { notifyUser } = await import("@/lib/notifications");
+      const guestUser = await db.user.findUnique({
+        where: { id: coupon.userId },
+        select: { phone: true },
+      });
+      const notificationMessage = `Your coupon ${code} has been reserved! Check-in: ${checkIn.toLocaleDateString()}. Please complete payment before ${paymentDeadline.toLocaleString()}.`;
+      await notifyUser(coupon.userId, "IN_APP", notificationMessage);
+      if (guestUser?.phone) {
+        await notifyUser(coupon.userId, "SMS", notificationMessage, guestUser.phone);
+      }
+    } catch (notifError) {
+      console.error("Failed to send reservation notification:", notifError);
+      // Non-blocking - reservation is still successful
+    }
 
     return NextResponse.json({
       coupon: updatedCoupon,
