@@ -6,7 +6,7 @@ export async function middleware(request: NextRequest) {
   const { pathname } = request.nextUrl;
 
   // Public routes - no auth needed
-  const publicRoutes = ["/", "/login", "/register", "/hotels"];
+  const publicRoutes = ["/", "/login", "/register", "/hotels", "/pricing", "/about", "/contact", "/faq", "/terms", "/privacy"];
   const isPublicRoute =
     publicRoutes.some((route) => pathname === route) ||
     pathname.startsWith("/hotels/") ||
@@ -86,3 +86,4 @@ export const config = {
     "/api/admin/:path*",
   ],
 };
+

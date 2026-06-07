@@ -20,7 +20,15 @@ export async function GET() {
     }
 
     const users = await db.user.findMany({
-      include: {
+      select: {
+        id: true,
+        name: true,
+        email: true,
+        phone: true,
+        role: true,
+        isActive: true,
+        createdAt: true,
+        updatedAt: true,
         subscription: true,
         hotelStaff: { include: { hotel: { select: { name: true } } } },
       },
@@ -36,3 +44,4 @@ export async function GET() {
     );
   }
 }
+

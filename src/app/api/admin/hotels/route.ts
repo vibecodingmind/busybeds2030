@@ -3,6 +3,40 @@ import { getServerSession } from "next-auth";
 import { authOptions } from "@/lib/auth";
 import { db } from "@/lib/db";
 
+export async function GET() {
+  try {
+    const session = await getServerSession(authOptions);
+
+    if (!session?.user?.id) {
+      return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+    }
+
+    const userRole = (session.user as { role: string }).role;
+    if (userRole !== "ADMIN") {
+      return NextResponse.json(
+        { error: "Admin access required" },
+        { status: 403 }
+      );
+    }
+
+    const hotels = await db.hotel.findMany({
+      include: {
+        roomTypes: true,
+        hotelStaff: { include: { user: { select: { name: true, email: true } } } },
+      },
+      orderBy: { createdAt: "desc" },
+    });
+
+    return NextResponse.json({ hotels });
+  } catch (error) {
+    console.error("Admin hotels error:", error);
+    return NextResponse.json(
+      { error: "Internal server error" },
+      { status: 500 }
+    );
+  }
+}
+
 export async function POST(request: NextRequest) {
   try {
     const session = await getServerSession(authOptions);
@@ -77,3 +111,4 @@ export async function POST(request: NextRequest) {
     );
   }
 }
+

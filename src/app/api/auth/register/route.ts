@@ -2,14 +2,45 @@ import { NextRequest, NextResponse } from "next/server";
 import bcrypt from "bcryptjs";
 import { db } from "@/lib/db";
 
+function sanitizeHtml(input: string): string {
+  return input
+    .replace(/&/g, "&amp;")
+    .replace(/</g, "&lt;")
+    .replace(/>/g, "&gt;")
+    .replace(/"/g, "&quot;")
+    .replace(/'/g, "&#x27;");
+}
+
 export async function POST(request: NextRequest) {
   try {
     const body = await request.json();
-    const { name, email, password, phone } = body;
+    let { name, email, password, phone } = body;
 
     if (!name || !email || !password) {
       return NextResponse.json(
         { error: "Name, email, and password are required" },
+        { status: 400 }
+      );
+    }
+
+    // Sanitize inputs to prevent XSS
+    name = sanitizeHtml(String(name).trim());
+    email = String(email).trim().toLowerCase();
+    phone = phone ? sanitizeHtml(String(phone).trim()) : null;
+
+    // Validate email format
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    if (!emailRegex.test(email)) {
+      return NextResponse.json(
+        { error: "Invalid email format" },
+        { status: 400 }
+      );
+    }
+
+    // Validate password strength
+    if (password.length < 8) {
+      return NextResponse.json(
+        { error: "Password must be at least 8 characters" },
         { status: 400 }
       );
     }
@@ -33,7 +64,7 @@ export async function POST(request: NextRequest) {
         name,
         email,
         passwordHash,
-        phone: phone || null,
+        phone,
         role: "GUEST",
       },
     });
@@ -55,3 +86,4 @@ export async function POST(request: NextRequest) {
     );
   }
 }
+

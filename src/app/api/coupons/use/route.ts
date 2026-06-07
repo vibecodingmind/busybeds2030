@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from "next/server";
 import { getServerSession } from "next-auth";
 import { authOptions } from "@/lib/auth";
 import { db } from "@/lib/db";
+import QRCode from "qrcode";
 
 export async function POST(request: NextRequest) {
   try {
@@ -12,7 +13,7 @@ export async function POST(request: NextRequest) {
     }
 
     const body = await request.json();
-    const { hotelId, roomTypeId } = body;
+    const { hotelId, roomTypeId, checkInDate, checkOutDate } = body;
 
     if (!hotelId) {
       return NextResponse.json(
@@ -77,18 +78,65 @@ export async function POST(request: NextRequest) {
       }
     }
 
+    // Calculate payment deadline based on check-in date
+    let paymentDeadline = null;
+    if (checkInDate) {
+      const checkIn = new Date(checkInDate);
+      const now = new Date();
+      const hoursUntilCheckIn = (checkIn.getTime() - now.getTime()) / (1000 * 60 * 60);
+
+      if (hoursUntilCheckIn <= 24) {
+        // Same day or next day: 1 hour
+        paymentDeadline = new Date(now.getTime() + 60 * 60 * 1000);
+      } else if (hoursUntilCheckIn <= 72) {
+        // 2-3 days: 2 hours
+        paymentDeadline = new Date(now.getTime() + 2 * 60 * 60 * 1000);
+      } else if (hoursUntilCheckIn <= 168) {
+        // 4-7 days: 6 hours
+        paymentDeadline = new Date(now.getTime() + 6 * 60 * 60 * 1000);
+      } else {
+        // 7+ days: 24 hours
+        paymentDeadline = new Date(now.getTime() + 24 * 60 * 60 * 1000);
+      }
+    }
+
+    // Generate QR code data URL
+    const qrData = JSON.stringify({
+      code: coupon.code,
+      hotel: hotel.name,
+      guest: session.user.name,
+      discount: discountPercent ? `${discountPercent}%` : "Negotiated",
+    });
+    const qrCodeUrl = await QRCode.toDataURL(qrData);
+
     // Assign coupon to hotel inquiry
     const updatedCoupon = await db.coupon.update({
       where: { id: coupon.id },
       data: {
         hotelId,
         roomTypeId: roomTypeId || null,
+        checkInDate: checkInDate ? new Date(checkInDate) : null,
+        checkOutDate: checkOutDate ? new Date(checkOutDate) : null,
         discountPercent,
         discountAmount,
+        paymentDeadline,
+        qrCodeUrl,
+        reservedAt: new Date(),
+        status: "RESERVED",
+        guestName: session.user.name,
       },
       include: {
         hotel: { select: { name: true, city: true } },
         roomType: { select: { name: true, rackRate: true, discountRate: true } },
+      },
+    });
+
+    // Decrement subscription credits
+    await db.subscription.update({
+      where: { id: subscription.id },
+      data: {
+        creditsUsed: { increment: 1 },
+        creditsRemaining: { decrement: 1 },
       },
     });
 
@@ -101,3 +149,4 @@ export async function POST(request: NextRequest) {
     );
   }
 }
+
