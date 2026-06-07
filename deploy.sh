@@ -56,12 +56,19 @@ BUILD_DIR=./.next-staging npx next build
 
 # Copy static files and prisma into standalone staging
 echo "[6/8] Preparing staging standalone..."
+# Remove incomplete static dir in standalone first, then copy fresh
+rm -rf .next-staging/standalone/.next/static 2>/dev/null || true
 cp -r .next-staging/static .next-staging/standalone/.next/ 2>/dev/null || true
 cp -r public .next-staging/standalone/ 2>/dev/null || true
 cp -r prisma .next-staging/standalone/ 2>/dev/null || true
 
 # Copy .env to staging standalone
 cp .env .next-staging/standalone/.env 2>/dev/null || true
+
+# CRITICAL FIX: Patch distDir in standalone server.js
+# The build uses BUILD_DIR=./.next-staging which gets embedded as distDir in server.js
+# After renaming to .next, we need to update this reference
+sed -i 's|\.next-staging|.next|g' .next-staging/standalone/server.js
 
 # Verify the staging build
 if [ ! -f ".next-staging/standalone/server.js" ]; then
