@@ -6,7 +6,7 @@ module.exports = {
     env: {
       NODE_ENV: 'production',
       PORT: 3008,
-      HOSTNAME: '0.0.0.0'
+      HOSTNAME: '127.0.0.1'
     },
     instances: 1,
     exec_mode: 'fork',
