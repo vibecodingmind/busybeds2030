@@ -137,7 +137,7 @@ export default function HotelsPage() {
   return (
     <div className="min-h-screen bg-glass-gradient-light">
       {/* Header */}
-      <div className="bg-glass-gradient pb-16 pt-8">
+      <div className="bg-glass-gradient pb-12 pt-6">
         <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
           <h1 className="text-3xl font-bold text-white sm:text-4xl">
             Browse Hotels

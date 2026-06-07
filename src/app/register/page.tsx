@@ -85,7 +85,7 @@ export default function RegisterPage() {
   };
 
   return (
-    <div className="relative flex min-h-screen items-center justify-center overflow-hidden bg-glass-gradient px-4 py-8">
+    <div className="relative flex min-h-[calc(100vh-64px)] items-center justify-center overflow-hidden bg-glass-gradient px-4 py-8">
       {/* Background orbs */}
       <div className="pointer-events-none absolute -top-32 right-1/4 h-96 w-96 rounded-full bg-[#C9A84C]/10 blur-[100px] float" />
       <div className="pointer-events-none absolute -bottom-32 left-1/4 h-80 w-80 rounded-full bg-[#C9A84C]/8 blur-[80px] float" style={{ animationDelay: "2s" }} />
@@ -93,12 +93,12 @@ export default function RegisterPage() {
       <div className="relative z-10 w-full max-w-md">
         {/* Logo */}
         <div className="mb-8 text-center">
-          <Link href="/" className="inline-flex items-center gap-2.5">
-            <BedDouble className="h-9 w-9 text-[#C9A84C] drop-shadow-[0_0_12px_rgba(201,168,76,0.4)]" />
-            <span className="text-2xl font-bold text-[#C9A84C] drop-shadow-[0_0_20px_rgba(201,168,76,0.3)]">
+          <span className="inline-flex items-center gap-2.5">
+            <BedDouble className="h-7 w-7 text-[#C9A84C] drop-shadow-[0_0_12px_rgba(201,168,76,0.4)]" />
+            <span className="text-xl font-bold text-[#C9A84C] drop-shadow-[0_0_20px_rgba(201,168,76,0.3)]">
               BusyBeds
             </span>
-          </Link>
+          </span>
         </div>
 
         {/* Glass Card */}

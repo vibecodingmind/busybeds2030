@@ -140,7 +140,7 @@ export function DashboardShell({ children }: { children: React.ReactNode }) {
   const [collapsed, setCollapsed] = useState(false);
 
   return (
-    <div className="flex h-screen overflow-hidden">
+    <div className="flex h-[calc(100vh-64px)] overflow-hidden">
       {/* Desktop sidebar */}
       <aside
         className={cn(
@@ -156,16 +156,6 @@ export function DashboardShell({ children }: { children: React.ReactNode }) {
 
       {/* Main content */}
       <div className="flex flex-1 flex-col overflow-hidden">
-        {/* Mobile header */}
-        <header className="flex h-14 items-center gap-3 border-b border-white/5 bg-glass-gradient px-4 lg:hidden">
-          <Link href="/dashboard" className="flex items-center gap-2">
-            <div className="flex h-7 w-7 items-center justify-center rounded-md bg-[#C9A84C] text-xs font-bold text-[#0A1628]">
-              BB
-            </div>
-            <span className="font-semibold text-[#C9A84C]">BusyBeds</span>
-          </Link>
-        </header>
-
         {/* Page content */}
         <main className="flex-1 overflow-y-auto bg-glass-gradient-light p-4 pb-24 md:p-6 lg:p-8 lg:pb-8">
           {children}

@@ -22,16 +22,10 @@ export function Navbar() {
 
   const isLoggedIn = !!session?.user;
 
-  // Hide navbar on pages that have their own navigation
+  // Only hide navbar on pages that have their own full sidebar navigation
   const hideNavbar =
-    pathname.startsWith("/dashboard") ||
-    pathname.startsWith("/hotel") ||
     pathname.startsWith("/admin") ||
-    pathname.startsWith("/coupons") ||
-    pathname.startsWith("/bookings") ||
-    pathname.startsWith("/subscription") ||
-    pathname === "/login" ||
-    pathname === "/register";
+    pathname.startsWith("/hotel");
 
   useEffect(() => {
     const handleScroll = () => setScrolled(window.scrollY > 20);
@@ -45,7 +39,7 @@ export function Navbar() {
 
   return (
     <header
-      className={`fixed top-0 left-0 right-0 z-50 transition-all duration-300 ${
+      className={`sticky top-0 left-0 right-0 z-50 transition-all duration-300 ${
         scrolled
           ? "glass-nav scrolled"
           : "glass-nav"
