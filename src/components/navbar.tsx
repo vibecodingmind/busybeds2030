@@ -22,14 +22,16 @@ export function Navbar() {
 
   const isLoggedIn = !!session?.user;
 
-  // Hide navbar on dashboard/hotel/admin routes (they have their own nav)
+  // Hide navbar on pages that have their own navigation
   const hideNavbar =
     pathname.startsWith("/dashboard") ||
     pathname.startsWith("/hotel") ||
     pathname.startsWith("/admin") ||
     pathname.startsWith("/coupons") ||
     pathname.startsWith("/bookings") ||
-    pathname.startsWith("/subscription");
+    pathname.startsWith("/subscription") ||
+    pathname === "/login" ||
+    pathname === "/register";
 
   useEffect(() => {
     const handleScroll = () => setScrolled(window.scrollY > 20);

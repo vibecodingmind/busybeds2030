@@ -2,7 +2,7 @@
 
 import { DashboardShell } from "@/components/dashboard-shell";
 
-export default function DashboardLayout({
+export default function CouponsLayout({
   children,
 }: {
   children: React.ReactNode;
