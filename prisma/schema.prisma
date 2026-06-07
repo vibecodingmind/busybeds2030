@@ -1,0 +1,130 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model User {
+  id           String   @id @default(cuid())
+  name         String
+  email        String   @unique
+  phone        String?
+  passwordHash String
+  role         String   @default("GUEST") // GUEST, HOTEL_STAFF, ADMIN
+  isActive     Boolean  @default(true)
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+  subscription Subscription?
+  coupons      Coupon[]
+  hotelStaff   HotelStaff?
+}
+
+model Subscription {
+  id               String   @id @default(cuid())
+  userId           String   @unique
+  user             User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  package          String   // STARTER, STANDARD, PREMIUM
+  creditsTotal     Int
+  creditsUsed      Int      @default(0)
+  creditsRemaining Int
+  startDate        DateTime
+  renewalDate      DateTime
+  status           String   @default("ACTIVE") // ACTIVE, EXPIRED, CANCELLED
+  paymentRef       String?
+  createdAt        DateTime @default(now())
+  coupons          Coupon[]
+}
+
+model Hotel {
+  id               String   @id @default(cuid())
+  name             String
+  city             String
+  country          String   @default("Tanzania")
+  description      String
+  starRating       Int
+  photos           String   // JSON array of photo URLs
+  amenities        String   // JSON array of amenities
+  depositPolicy    String   @default("FIFTY_PERCENT") // FIFTY_PERCENT, FULL, NONE, CARD_HOLD
+  commissionPercent Float  @default(15.0)
+  isActive         Boolean  @default(true)
+  contactEmail     String?
+  contactPhone     String?
+  createdAt        DateTime @default(now())
+  roomTypes        RoomType[]
+  hotelStaff       HotelStaff[]
+  coupons          Coupon[]
+  commissionRecords CommissionRecord[]
+}
+
+model RoomType {
+  id              String   @id @default(cuid())
+  hotelId         String
+  hotel           Hotel    @relation(fields: [hotelId], references: [id], onDelete: Cascade)
+  name            String
+  rackRate        Float
+  discountRate    Float
+  discountPercent Float
+  description     String?
+  coupons         Coupon[]
+}
+
+model HotelStaff {
+  id      String @id @default(cuid())
+  hotelId String
+  hotel   Hotel  @relation(fields: [hotelId], references: [id], onDelete: Cascade)
+  userId  String @unique
+  user    User   @relation(fields: [userId], references: [id], onDelete: Cascade)
+}
+
+model Coupon {
+  id              String    @id @default(cuid())
+  subscriptionId  String
+  subscription    Subscription @relation(fields: [subscriptionId], references: [id], onDelete: Cascade)
+  userId          String
+  user            User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+  code            String    @unique
+  qrCodeUrl       String?
+  status          String    @default("AVAILABLE") // AVAILABLE, RESERVED, CONFIRMED, REDEEMED, NO_SHOW, CANCELLED, EXPIRED
+  hotelId         String?
+  hotel           Hotel?    @relation(fields: [hotelId], references: [id])
+  roomTypeId      String?
+  roomType        RoomType? @relation(fields: [roomTypeId], references: [id])
+  checkInDate     DateTime?
+  checkOutDate    DateTime?
+  discountPercent Float?
+  discountAmount  Float?
+  paymentDeadline DateTime?
+  reservedAt      DateTime?
+  confirmedAt     DateTime?
+  redeemedAt      DateTime?
+  cancelledAt     DateTime?
+  cancelReason    String?
+  guestName       String?
+  createdAt       DateTime  @default(now())
+  updatedAt       DateTime  @updatedAt
+  commissionRecord CommissionRecord?
+}
+
+model Notification {
+  id        String   @id @default(cuid())
+  userId    String
+  channel   String   // WHATSAPP, SMS, IN_APP
+  message   String
+  status    String   @default("PENDING") // PENDING, SENT, FAILED
+  sentAt    DateTime?
+  createdAt DateTime @default(now())
+}
+
+model CommissionRecord {
+  id          String   @id @default(cuid())
+  hotelId     String
+  hotel       Hotel    @relation(fields: [hotelId], references: [id])
+  couponId    String   @unique
+  coupon      Coupon   @relation(fields: [couponId], references: [id])
+  amount      Float
+  status      String   @default("PENDING") // PENDING, COLLECTED
+  collectedAt DateTime?
+}
