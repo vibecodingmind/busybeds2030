@@ -52,7 +52,7 @@ rm -rf .next-staging
 
 # Build using BUILD_DIR env variable to output to staging directory
 # next.config.ts reads process.env.BUILD_DIR for distDir
-BUILD_DIR=./.next-staging npx next build 2>&1 | tail -15
+BUILD_DIR=./.next-staging npx next build
 
 # Copy static files and prisma into standalone staging
 echo "[6/8] Preparing staging standalone..."
