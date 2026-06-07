@@ -70,6 +70,16 @@ cp .next-staging/build-manifest.json .next-staging/standalone/.next/ 2>/dev/null
 cp .next-staging/app-path-routes-manifest.json .next-staging/standalone/.next/ 2>/dev/null || true
 cp .next-staging/prerender-manifest.json .next-staging/standalone/.next/ 2>/dev/null || true
 cp .next-staging/routes-manifest.json .next-staging/standalone/.next/ 2>/dev/null || true
+cp .next-staging/required-server-files.json .next-staging/standalone/.next/ 2>/dev/null || true
+cp .next-staging/required-server-files.js .next-staging/standalone/.next/ 2>/dev/null || true
+cp .next-staging/images-manifest.json .next-staging/standalone/.next/ 2>/dev/null || true
+cp .next-staging/fallback-build-manifest.json .next-staging/standalone/.next/ 2>/dev/null || true
+cp .next-staging/export-marker.json .next-staging/standalone/.next/ 2>/dev/null || true
+cp .next-staging/package.json .next-staging/standalone/.next/ 2>/dev/null || true
+cp .next-staging/next-server.js.nft.json .next-staging/standalone/.next/ 2>/dev/null || true
+cp .next-staging/next-minimal-server.js.nft.json .next-staging/standalone/.next/ 2>/dev/null || true
+rm -rf .next-staging/standalone/.next/diagnostics 2>/dev/null || true
+cp -r .next-staging/diagnostics .next-staging/standalone/.next/ 2>/dev/null || true
 cp -r public .next-staging/standalone/ 2>/dev/null || true
 cp -r prisma .next-staging/standalone/ 2>/dev/null || true
 
