@@ -25,7 +25,7 @@ export function Navbar() {
   // Only hide navbar on pages that have their own full sidebar navigation
   const hideNavbar =
     pathname.startsWith("/admin") ||
-    pathname.startsWith("/hotel");
+    pathname.startsWith("/hotel/") || pathname === "/hotel";
 
   useEffect(() => {
     const handleScroll = () => setScrolled(window.scrollY > 20);
