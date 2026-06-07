@@ -1,6 +1,6 @@
 'use client'
 
-import { useState, useEffect } from 'react'
+import { useState, useEffect, Suspense } from 'react'
 import { useSearchParams, useRouter } from 'next/navigation'
 import {
   Phone,
@@ -52,7 +52,7 @@ interface CouponData {
   roomType: { name: string; rackRate: number; discountRate: number } | null
 }
 
-export default function UseCouponPage() {
+function UseCouponContent() {
   const searchParams = useSearchParams()
   const router = useRouter()
   const hotelId = searchParams.get('hotelId')
@@ -431,5 +431,13 @@ export default function UseCouponPage() {
         </Button>
       </div>
     </div>
+  )
+}
+
+export default function UseCouponPage() {
+  return (
+    <Suspense fallback={<div className="mx-auto max-w-2xl space-y-6"><div className="h-10 w-48 bg-gray-200 animate-pulse rounded" /><div className="h-64 w-full bg-gray-200 animate-pulse rounded" /></div>}>
+      <UseCouponContent />
+    </Suspense>
   )
 }
