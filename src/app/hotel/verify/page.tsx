@@ -223,7 +223,7 @@ function VerifyContent() {
       const res = await fetch("/api/hotel/confirm-payment", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ couponId: coupon!.id }),
+        body: JSON.stringify({ code: coupon!.code }),
       });
 
       const data = await res.json();
@@ -248,7 +248,7 @@ function VerifyContent() {
       const res = await fetch("/api/hotel/checkin", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ couponId: coupon!.id }),
+        body: JSON.stringify({ code: coupon!.code }),
       });
 
       const data = await res.json();
@@ -273,7 +273,7 @@ function VerifyContent() {
       const res = await fetch("/api/hotel/no-show", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ couponId: coupon!.id }),
+        body: JSON.stringify({ code: coupon!.code }),
       });
 
       const data = await res.json();
@@ -300,7 +300,7 @@ function VerifyContent() {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
-          couponId: coupon!.id,
+          code: coupon!.code,
           cancelledBy: "HOTEL",
         }),
       });
