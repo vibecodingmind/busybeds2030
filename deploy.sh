@@ -50,21 +50,9 @@ echo "[5/8] Building Next.js app to staging directory..."
 # Remove old staging build if any
 rm -rf .next-staging
 
-# Temporarily set distDir to .next-staging for the build
-# We do this by creating a temp config
-cat > next.config.build.ts << 'BUILDEOF'
-import type { NextConfig } from "next";
-const nextConfig: NextConfig = {
-  output: "standalone",
-  distDir: "./.next-staging",
-  typescript: { ignoreBuildErrors: true },
-  reactStrictMode: false,
-};
-export default nextConfig;
-BUILDEOF
-
-# Build using the staging config
-NEXT_CONFIG_PATH=next.config.build.ts npx next build --config next.config.build.ts 2>&1 | tail -10
+# Build using BUILD_DIR env variable to output to staging directory
+# next.config.ts reads process.env.BUILD_DIR for distDir
+BUILD_DIR=./.next-staging npx next build 2>&1 | tail -15
 
 # Copy static files and prisma into standalone staging
 echo "[6/8] Preparing staging standalone..."
@@ -74,9 +62,6 @@ cp -r prisma .next-staging/standalone/ 2>/dev/null || true
 
 # Copy .env to staging standalone
 cp .env .next-staging/standalone/.env 2>/dev/null || true
-
-# Clean up temp config
-rm -f next.config.build.ts
 
 # Verify the staging build
 if [ ! -f ".next-staging/standalone/server.js" ]; then
