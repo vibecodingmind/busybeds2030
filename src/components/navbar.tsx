@@ -11,6 +11,9 @@ import {
   LogOut,
   Ticket,
   LayoutDashboard,
+  Search,
+  Globe,
+  UserCircle,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 
@@ -22,7 +25,6 @@ export function Navbar() {
 
   const isLoggedIn = !!session?.user;
 
-  // Only hide navbar on pages that have their own full sidebar navigation
   const hideNavbar =
     pathname.startsWith("/admin") ||
     pathname.startsWith("/hotel/") || pathname === "/hotel";
@@ -32,8 +34,6 @@ export function Navbar() {
     window.addEventListener("scroll", handleScroll);
     return () => window.removeEventListener("scroll", handleScroll);
   }, []);
-
-  // Close mobile menu on route change (handled in link clicks)
 
   if (hideNavbar) return null;
 
@@ -45,31 +45,37 @@ export function Navbar() {
           : "glass-nav"
       }`}
     >
-      <div className="mx-auto flex h-16 max-w-7xl items-center justify-between px-4 sm:px-6 lg:px-8">
+      <div className="mx-auto flex h-20 max-w-7xl items-center justify-between px-6 lg:px-8">
         {/* Logo */}
-        <Link href="/" className="flex items-center gap-2.5">
-          <BedDouble className="h-7 w-7 text-[#C9A84C] drop-shadow-[0_0_10px_rgba(201,168,76,0.3)]" />
-          <span className="text-xl font-bold text-[#C9A84C] drop-shadow-[0_0_16px_rgba(201,168,76,0.2)]">
+        <Link href="/" className="flex items-center gap-2">
+          <BedDouble className="h-8 w-8 text-[#C9A84C]" />
+          <span className="text-2xl font-bold text-[#222222] tracking-tight">
             BusyBeds
           </span>
         </Link>
+
+        {/* Center - Search bar (desktop) */}
+        <div className="hidden md:flex items-center">
+          <Link href="/hotels" className="flex items-center border border-gray-300 rounded-full py-2 px-4 shadow-sm hover:shadow-md transition-shadow gap-3">
+            <span className="text-sm font-semibold text-[#222222]">Anywhere</span>
+            <span className="h-6 w-px bg-gray-300" />
+            <span className="text-sm font-semibold text-[#222222]">Any week</span>
+            <span className="h-6 w-px bg-gray-300" />
+            <span className="text-sm text-gray-500">Add guests</span>
+            <div className="bg-[#C9A84C] rounded-full p-2 ml-1">
+              <Search className="h-3 w-3 text-white" />
+            </div>
+          </Link>
+        </div>
 
         {/* Desktop nav */}
         <nav className="hidden items-center gap-1 md:flex">
           <Link href="/hotels">
             <Button
               variant="ghost"
-              className="text-white/70 hover:text-[#C9A84C] hover:bg-white/5"
+              className="text-[#222222] hover:bg-gray-100 rounded-full font-medium text-sm"
             >
               Browse Hotels
-            </Button>
-          </Link>
-          <Link href="/#how-it-works">
-            <Button
-              variant="ghost"
-              className="text-white/70 hover:text-[#C9A84C] hover:bg-white/5"
-            >
-              How It Works
             </Button>
           </Link>
           {isLoggedIn ? (
@@ -77,7 +83,7 @@ export function Navbar() {
               <Link href="/dashboard">
                 <Button
                   variant="ghost"
-                  className="text-white/70 hover:text-[#C9A84C] hover:bg-white/5"
+                  className="text-[#222222] hover:bg-gray-100 rounded-full font-medium text-sm"
                 >
                   <LayoutDashboard className="mr-1 h-4 w-4" />
                   Dashboard
@@ -86,37 +92,24 @@ export function Navbar() {
               <Link href="/coupons">
                 <Button
                   variant="ghost"
-                  className="text-white/70 hover:text-[#C9A84C] hover:bg-white/5"
+                  className="text-[#222222] hover:bg-gray-100 rounded-full font-medium text-sm"
                 >
                   <Ticket className="mr-1 h-4 w-4" />
                   Coupons
                 </Button>
               </Link>
-              <Button
-                variant="ghost"
-                className="text-white/70 hover:text-red-400 hover:bg-white/5"
-                onClick={() => signOut({ callbackUrl: "/" })}
-              >
-                <LogOut className="mr-1 h-4 w-4" />
-                Logout
-              </Button>
+              <div className="flex items-center border border-gray-300 rounded-full py-1.5 px-3 ml-2 gap-2 hover:shadow-md transition-shadow cursor-pointer" onClick={() => signOut({ callbackUrl: "/" })}>
+                <Menu className="h-4 w-4 text-gray-600" />
+                <UserCircle className="h-7 w-7 text-gray-600" />
+              </div>
             </>
           ) : (
-            <>
+            <div className="flex items-center border border-gray-300 rounded-full py-1.5 px-3 ml-2 gap-2 hover:shadow-md transition-shadow">
+              <Menu className="h-4 w-4 text-gray-600" />
               <Link href="/login">
-                <Button
-                  variant="ghost"
-                  className="text-white/70 hover:text-[#C9A84C] hover:bg-white/5"
-                >
-                  Login
-                </Button>
+                <UserCircle className="h-7 w-7 text-gray-600 cursor-pointer" />
               </Link>
-              <Link href="/register">
-                <Button className="shimmer-gold rounded-xl font-semibold">
-                  Sign Up
-                </Button>
-              </Link>
-            </>
+            </div>
           )}
         </nav>
 
@@ -124,82 +117,52 @@ export function Navbar() {
         <Button
           variant="ghost"
           size="icon"
-          className="text-white/70 hover:text-[#C9A84C] md:hidden"
+          className="text-[#222222] md:hidden"
           onClick={() => setMobileOpen(!mobileOpen)}
           aria-label="Toggle menu"
         >
-          {mobileOpen ? (
-            <X className="h-6 w-6" />
-          ) : (
-            <Menu className="h-6 w-6" />
-          )}
+          {mobileOpen ? <X className="h-6 w-6" /> : <Menu className="h-6 w-6" />}
         </Button>
       </div>
 
       {/* Mobile menu */}
       {mobileOpen && (
-        <div className="glass-card-dark border-t border-white/5 md:hidden">
+        <div className="border-t border-gray-100 bg-white md:hidden">
           <nav className="mx-auto flex max-w-7xl flex-col gap-1 px-4 py-4">
             <Link href="/hotels" onClick={() => setMobileOpen(false)}>
-              <Button
-                variant="ghost"
-                className="w-full justify-start text-white/70 hover:text-[#C9A84C] hover:bg-white/5"
-              >
+              <Button variant="ghost" className="w-full justify-start text-[#222222] hover:bg-gray-100 rounded-xl font-medium">
                 Browse Hotels
-              </Button>
-            </Link>
-            <Link href="/#how-it-works" onClick={() => setMobileOpen(false)}>
-              <Button
-                variant="ghost"
-                className="w-full justify-start text-white/70 hover:text-[#C9A84C] hover:bg-white/5"
-              >
-                How It Works
               </Button>
             </Link>
             {isLoggedIn ? (
               <>
                 <Link href="/dashboard" onClick={() => setMobileOpen(false)}>
-                  <Button
-                    variant="ghost"
-                    className="w-full justify-start text-white/70 hover:text-[#C9A84C] hover:bg-white/5"
-                  >
-                    <LayoutDashboard className="mr-2 h-4 w-4" />
-                    Dashboard
+                  <Button variant="ghost" className="w-full justify-start text-[#222222] hover:bg-gray-100 rounded-xl font-medium">
+                    <LayoutDashboard className="mr-2 h-4 w-4" /> Dashboard
                   </Button>
                 </Link>
                 <Link href="/coupons" onClick={() => setMobileOpen(false)}>
-                  <Button
-                    variant="ghost"
-                    className="w-full justify-start text-white/70 hover:text-[#C9A84C] hover:bg-white/5"
-                  >
-                    <Ticket className="mr-2 h-4 w-4" />
-                    My Coupons
+                  <Button variant="ghost" className="w-full justify-start text-[#222222] hover:bg-gray-100 rounded-xl font-medium">
+                    <Ticket className="mr-2 h-4 w-4" /> Coupons
                   </Button>
                 </Link>
                 <Button
                   variant="ghost"
-                  className="w-full justify-start text-white/70 hover:text-red-400 hover:bg-white/5"
-                  onClick={() => {
-                    setMobileOpen(false);
-                    signOut({ callbackUrl: "/" });
-                  }}
+                  className="w-full justify-start text-red-500 hover:bg-red-50 rounded-xl font-medium"
+                  onClick={() => signOut({ callbackUrl: "/" })}
                 >
-                  <LogOut className="mr-2 h-4 w-4" />
-                  Logout
+                  <LogOut className="mr-2 h-4 w-4" /> Logout
                 </Button>
               </>
             ) : (
               <>
                 <Link href="/login" onClick={() => setMobileOpen(false)}>
-                  <Button
-                    variant="ghost"
-                    className="w-full justify-start text-white/70 hover:text-[#C9A84C] hover:bg-white/5"
-                  >
+                  <Button variant="ghost" className="w-full justify-start text-[#222222] hover:bg-gray-100 rounded-xl font-medium">
                     Login
                   </Button>
                 </Link>
                 <Link href="/register" onClick={() => setMobileOpen(false)}>
-                  <Button className="w-full shimmer-gold rounded-xl font-semibold">
+                  <Button className="w-full bg-[#C9A84C] hover:bg-[#b8963f] text-white rounded-xl font-semibold">
                     Sign Up
                   </Button>
                 </Link>

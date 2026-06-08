@@ -3,6 +3,7 @@
 import { Suspense, useState, useEffect } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import Link from "next/link";
+import Image from "next/image";
 import { signIn } from "next-auth/react";
 import {
   BedDouble,
@@ -32,21 +33,24 @@ const demoAccounts = [
     email: "admin@busybeds.com",
     password: "password123",
     icon: Shield,
-    color: "from-red-500/20 to-orange-500/20 border-red-500/30 hover:border-red-400/50",
+    color: "bg-red-50 border-red-200 hover:bg-red-100",
+    iconColor: "text-red-500",
   },
   {
     label: "Hotel Staff",
     email: "serengeti@busybeds.com",
     password: "password123",
     icon: Building2,
-    color: "from-blue-500/20 to-cyan-500/20 border-blue-500/30 hover:border-blue-400/50",
+    color: "bg-blue-50 border-blue-200 hover:bg-blue-100",
+    iconColor: "text-blue-500",
   },
   {
     label: "Guest",
     email: "john@busybeds.com",
     password: "password123",
     icon: User,
-    color: "from-green-500/20 to-emerald-500/20 border-green-500/30 hover:border-green-400/50",
+    color: "bg-green-50 border-green-200 hover:bg-green-100",
+    iconColor: "text-green-500",
   },
 ];
 
@@ -56,18 +60,12 @@ function LoginForm() {
   const [loading, setLoading] = useState(false);
   const [demoLoading, setDemoLoading] = useState<string | null>(null);
   const [showPassword, setShowPassword] = useState(false);
-
-  // Forgot password dialog state
   const [forgotDialogOpen, setForgotDialogOpen] = useState(false);
   const [forgotEmail, setForgotEmail] = useState("");
   const [forgotLoading, setForgotLoading] = useState(false);
   const [forgotSent, setForgotSent] = useState(false);
 
-  const [form, setForm] = useState({
-    email: "",
-    password: "",
-  });
-
+  const [form, setForm] = useState({ email: "", password: "" });
   const [errors, setErrors] = useState<Record<string, string>>({});
 
   useEffect(() => {
@@ -99,30 +97,18 @@ function LoginForm() {
 
   const handleLogin = async (email: string, password: string) => {
     try {
-      const result = await signIn("credentials", {
-        email,
-        password,
-        redirect: false,
-      });
-
+      const result = await signIn("credentials", { email, password, redirect: false });
       if (result?.error) {
         toast.error(result.error || "Invalid email or password. Please try again.");
         return;
       }
-
       const sessionRes = await fetch("/api/auth/session");
       const session = await sessionRes.json();
-
       toast.success("Welcome back!");
-
       const role = session?.user?.role;
-      if (role === "ADMIN") {
-        router.push("/admin");
-      } else if (role === "HOTEL_STAFF") {
-        router.push("/hotel/dashboard");
-      } else {
-        router.push("/dashboard");
-      }
+      if (role === "ADMIN") router.push("/admin");
+      else if (role === "HOTEL_STAFF") router.push("/hotel/dashboard");
+      else router.push("/dashboard");
     } catch {
       toast.error("Something went wrong. Please try again.");
     }
@@ -147,7 +133,6 @@ function LoginForm() {
       toast.error("Please enter a valid email address");
       return;
     }
-
     setForgotLoading(true);
     try {
       const res = await fetch("/api/auth/forgot-password", {
@@ -155,7 +140,6 @@ function LoginForm() {
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ email: forgotEmail }),
       });
-
       const data = await res.json();
       setForgotSent(true);
       toast.success(data.message || "If that email exists, we've sent a reset link.");
@@ -169,74 +153,62 @@ function LoginForm() {
   const updateField = (field: string, value: string) => {
     setForm((prev) => ({ ...prev, [field]: value }));
     if (errors[field]) {
-      setErrors((prev) => {
-        const next = { ...prev };
-        delete next[field];
-        return next;
-      });
+      setErrors((prev) => { const next = { ...prev }; delete next[field]; return next; });
     }
   };
 
   return (
-    <div className="relative flex min-h-[calc(100vh-64px)] items-center justify-center overflow-hidden bg-glass-gradient px-4 py-8">
-      {/* Animated background orbs */}
-      <div className="pointer-events-none absolute -top-32 left-1/4 h-96 w-96 rounded-full bg-[#C9A84C]/10 blur-[100px] float" />
-      <div className="pointer-events-none absolute -bottom-32 right-1/4 h-80 w-80 rounded-full bg-[#C9A84C]/8 blur-[80px] float" style={{ animationDelay: "2s" }} />
-      <div className="pointer-events-none absolute top-1/2 left-1/2 h-64 w-64 -translate-x-1/2 -translate-y-1/2 rounded-full bg-[#C9A84C]/5 blur-[60px] float" style={{ animationDelay: "4s" }} />
-
-      <div className="relative z-10 w-full max-w-md">
-        <div className="mb-8 text-center">
-          <span className="inline-flex items-center gap-2.5">
-            <BedDouble className="h-7 w-7 text-[#C9A84C] drop-shadow-[0_0_12px_rgba(201,168,76,0.4)]" />
-            <span className="text-xl font-bold text-[#C9A84C] drop-shadow-[0_0_20px_rgba(201,168,76,0.3)]">
-              BusyBeds
-            </span>
-          </span>
+    <div className="relative flex min-h-[calc(100vh-80px)]">
+      {/* Left side - Image */}
+      <div className="hidden lg:block lg:w-1/2 relative">
+        <Image
+          src="/images/hotels/hero-banner.png"
+          alt="East Africa Luxury Travel"
+          fill
+          className="object-cover"
+          priority
+        />
+        <div className="absolute inset-0 bg-gradient-to-r from-white/20 to-transparent" />
+        <div className="absolute bottom-12 left-12 right-12">
+          <h2 className="text-3xl font-bold text-white mb-2">Discover East Africa</h2>
+          <p className="text-white/90">Unlock exclusive hotel discounts across Tanzania, Kenya & Uganda</p>
         </div>
+      </div>
 
-        {/* Glass Card */}
-        <div className="glass-card-dark rounded-2xl p-8">
-          <div className="mb-6 text-center">
-            <h1 className="text-2xl font-bold text-white">Welcome Back</h1>
-            <p className="mt-1 text-sm text-white/50">
-              Log in to access your member discounts
-            </p>
+      {/* Right side - Form */}
+      <div className="flex flex-1 items-center justify-center px-4 py-12 bg-white lg:px-12">
+        <div className="w-full max-w-md">
+          <div className="mb-8">
+            <Link href="/" className="inline-flex items-center gap-2 mb-8">
+              <BedDouble className="h-8 w-8 text-[#C9A84C]" />
+              <span className="text-2xl font-bold text-[#222222]">BusyBeds</span>
+            </Link>
+            <h1 className="text-2xl font-bold text-[#222222]">Welcome back</h1>
+            <p className="mt-1 text-gray-500">Log in to access your member discounts</p>
           </div>
 
-          <form onSubmit={handleSubmit} className="space-y-4">
-            {/* Email */}
+          <form onSubmit={handleSubmit} className="space-y-5">
             <div className="space-y-2">
-              <Label htmlFor="email" className="text-white/70">
-                Email Address
-              </Label>
+              <Label htmlFor="email" className="text-[#222222]">Email Address</Label>
               <Input
                 id="email"
                 type="email"
                 placeholder="john@example.com"
                 value={form.email}
                 onChange={(e) => updateField("email", e.target.value)}
-                className="h-11 rounded-xl border-white/10 bg-white/5 text-white placeholder:text-white/30 focus:border-[#C9A84C]/50 focus:bg-white/10"
+                className="h-12 rounded-xl border-gray-300 text-[#222222] placeholder:text-gray-400 focus:border-[#C9A84C] focus:ring-[#C9A84C]"
                 disabled={loading || !!demoLoading}
               />
-              {errors.email && (
-                <p className="text-sm text-red-400">{errors.email}</p>
-              )}
+              {errors.email && <p className="text-sm text-red-500">{errors.email}</p>}
             </div>
 
-            {/* Password */}
             <div className="space-y-2">
               <div className="flex items-center justify-between">
-                <Label htmlFor="password" className="text-white/70">
-                  Password
-                </Label>
+                <Label htmlFor="password" className="text-[#222222]">Password</Label>
                 <button
                   type="button"
-                  onClick={() => {
-                    setForgotDialogOpen(true);
-                    setForgotSent(false);
-                    setForgotEmail(form.email || "");
-                  }}
-                  className="text-xs text-[#C9A84C] hover:text-[#d4b96a] transition-colors"
+                  onClick={() => { setForgotDialogOpen(true); setForgotSent(false); setForgotEmail(form.email || ""); }}
+                  className="text-sm text-[#C9A84C] hover:text-[#b8963f] font-medium"
                 >
                   Forgot password?
                 </button>
@@ -248,88 +220,64 @@ function LoginForm() {
                   placeholder="Enter your password"
                   value={form.password}
                   onChange={(e) => updateField("password", e.target.value)}
-                  className="h-11 rounded-xl border-white/10 bg-white/5 pr-10 text-white placeholder:text-white/30 focus:border-[#C9A84C]/50 focus:bg-white/10"
+                  className="h-12 rounded-xl border-gray-300 pr-10 text-[#222222] placeholder:text-gray-400 focus:border-[#C9A84C] focus:ring-[#C9A84C]"
                   disabled={loading || !!demoLoading}
                 />
                 <Button
                   type="button"
                   variant="ghost"
                   size="icon"
-                  className="absolute right-1 top-1/2 h-9 w-9 -translate-y-1/2 text-white/40 hover:text-white/70"
+                  className="absolute right-1 top-1/2 h-9 w-9 -translate-y-1/2 text-gray-400 hover:text-gray-600"
                   onClick={() => setShowPassword(!showPassword)}
                 >
-                  {showPassword ? (
-                    <EyeOff className="h-4 w-4" />
-                  ) : (
-                    <Eye className="h-4 w-4" />
-                  )}
+                  {showPassword ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
                 </Button>
               </div>
-              {errors.password && (
-                <p className="text-sm text-red-400">{errors.password}</p>
-              )}
+              {errors.password && <p className="text-sm text-red-500">{errors.password}</p>}
             </div>
 
-            {/* Submit */}
             <Button
               type="submit"
-              className="h-12 w-full rounded-xl shimmer-gold text-base"
+              className="h-12 w-full rounded-xl bg-[#C9A84C] hover:bg-[#b8963f] text-white font-semibold text-base"
               disabled={loading || !!demoLoading}
             >
               {loading ? (
-                <>
-                  <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                  Logging In...
-                </>
-              ) : (
-                "Log In"
-              )}
+                <><Loader2 className="mr-2 h-4 w-4 animate-spin" />Logging In...</>
+              ) : "Log In"}
             </Button>
           </form>
 
           {/* Divider */}
           <div className="relative my-6">
-            <div className="absolute inset-0 flex items-center">
-              <div className="w-full border-t border-white/10" />
-            </div>
+            <div className="absolute inset-0 flex items-center"><div className="w-full border-t border-gray-200" /></div>
             <div className="relative flex justify-center text-xs">
-              <span className="bg-transparent px-3 text-white/40">
-                Quick Demo Access
-              </span>
+              <span className="bg-white px-3 text-gray-400">Quick Demo Access</span>
             </div>
           </div>
 
-          {/* Demo Account Buttons */}
+          {/* Demo Buttons */}
           <div className="grid grid-cols-3 gap-3">
             {demoAccounts.map((account) => (
               <button
                 key={account.label}
                 onClick={() => handleDemoLogin(account)}
                 disabled={loading || !!demoLoading}
-                className={`flex flex-col items-center gap-1.5 rounded-xl bg-gradient-to-b ${account.color} px-3 py-3 transition-all duration-200 disabled:opacity-50`}
+                className={`flex flex-col items-center gap-1.5 rounded-xl border p-3 transition-all duration-200 disabled:opacity-50 ${account.color}`}
               >
                 {demoLoading === account.label ? (
-                  <Loader2 className="h-5 w-5 animate-spin text-white/80" />
+                  <Loader2 className="h-5 w-5 animate-spin text-gray-400" />
                 ) : (
-                  <account.icon className="h-5 w-5 text-white/80" />
+                  <account.icon className={`h-5 w-5 ${account.iconColor}`} />
                 )}
-                <span className="text-[11px] font-semibold text-white/80">
-                  {account.label}
-                </span>
+                <span className="text-[11px] font-semibold text-[#222222]">{account.label}</span>
               </button>
             ))}
           </div>
 
-          {/* Sign Up Link */}
-          <div className="mt-6 text-center">
-            <p className="text-sm text-white/40">
+          <div className="mt-8 text-center">
+            <p className="text-sm text-gray-500">
               Don&apos;t have an account?{" "}
-              <Link
-                href="/register"
-                className="font-medium text-[#C9A84C] hover:text-[#d4b96a] transition-colors"
-              >
-                Sign Up
-              </Link>
+              <Link href="/register" className="font-medium text-[#C9A84C] hover:text-[#b8963f]">Sign Up</Link>
             </p>
           </div>
         </div>
@@ -337,63 +285,48 @@ function LoginForm() {
 
       {/* Forgot Password Dialog */}
       <Dialog open={forgotDialogOpen} onOpenChange={setForgotDialogOpen}>
-        <DialogContent className="glass-card-dark border-white/10 sm:max-w-md">
+        <DialogContent className="sm:max-w-md">
           <DialogHeader>
-            <DialogTitle className="flex items-center gap-2 text-white">
-              <KeyRound className="h-5 w-5 text-[#C9A84C]" />
-              Reset Password
+            <DialogTitle className="flex items-center gap-2 text-[#222222]">
+              <KeyRound className="h-5 w-5 text-[#C9A84C]" /> Reset Password
             </DialogTitle>
-            <DialogDescription className="text-white/50">
+            <DialogDescription className="text-gray-500">
               {forgotSent
                 ? "Check your email for a password reset link."
                 : "Enter your email address and we'll send you a link to reset your password."}
             </DialogDescription>
           </DialogHeader>
-
           {!forgotSent ? (
             <div className="space-y-4 py-2">
               <div className="space-y-2">
-                <Label htmlFor="forgot-email" className="text-white/70">
-                  Email Address
-                </Label>
+                <Label htmlFor="forgot-email" className="text-[#222222]">Email Address</Label>
                 <Input
                   id="forgot-email"
                   type="email"
                   placeholder="john@example.com"
                   value={forgotEmail}
                   onChange={(e) => setForgotEmail(e.target.value)}
-                  className="h-11 rounded-xl border-white/10 bg-white/5 text-white placeholder:text-white/30 focus:border-[#C9A84C]/50 focus:bg-white/10"
+                  className="h-11 rounded-xl border-gray-300 focus:border-[#C9A84C] focus:ring-[#C9A84C]"
                   disabled={forgotLoading}
                 />
               </div>
               <Button
-                className="w-full shimmer-gold text-[#0A1628] hover:bg-[#C9A84C]/90 h-11 font-semibold"
+                className="w-full h-11 bg-[#C9A84C] hover:bg-[#b8963f] text-white font-semibold rounded-xl"
                 onClick={handleForgotPassword}
                 disabled={forgotLoading}
               >
-                {forgotLoading ? (
-                  <>
-                    <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                    Sending...
-                  </>
-                ) : (
-                  "Send Reset Link"
-                )}
+                {forgotLoading ? <><Loader2 className="mr-2 h-4 w-4 animate-spin" />Sending...</> : "Send Reset Link"}
               </Button>
             </div>
           ) : (
             <div className="py-2">
-              <div className="rounded-lg border border-green-500/20 bg-green-500/10 p-4 text-center">
-                <p className="text-sm text-green-300">
-                  If an account with that email exists, we&apos;ve sent a password reset link.
-                </p>
-                <p className="mt-2 text-xs text-white/40">
-                  Check your inbox and spam folder.
-                </p>
+              <div className="rounded-xl border border-green-200 bg-green-50 p-4 text-center">
+                <p className="text-sm text-green-700">If an account with that email exists, we&apos;ve sent a password reset link.</p>
+                <p className="mt-2 text-xs text-gray-500">Check your inbox and spam folder.</p>
               </div>
               <Button
                 variant="outline"
-                className="mt-4 w-full border-white/10 text-white/70 hover:bg-white/5 hover:text-white"
+                className="mt-4 w-full rounded-xl border-gray-300"
                 onClick={() => setForgotDialogOpen(false)}
               >
                 Close
@@ -410,10 +343,10 @@ export default function LoginPage() {
   return (
     <Suspense
       fallback={
-        <div className="flex min-h-screen items-center justify-center bg-glass-gradient">
+        <div className="flex min-h-screen items-center justify-center bg-white">
           <div className="text-center">
             <BedDouble className="mx-auto h-8 w-8 animate-pulse text-[#C9A84C]" />
-            <p className="mt-2 text-white/50">Loading...</p>
+            <p className="mt-2 text-gray-400">Loading...</p>
           </div>
         </div>
       }

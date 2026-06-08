@@ -126,7 +126,7 @@
   }
 }
 
-/* Custom scrollbar for long lists */
+/* Custom scrollbar */
 .custom-scrollbar::-webkit-scrollbar {
   width: 6px;
 }
@@ -141,10 +141,72 @@
   background: oklch(0.65 0 0);
 }
 
-/* ==============================
-   GLASSMORPHISM CLASSES
-   ============================== */
+/* Airbnb-style button */
+.btn-primary {
+  background: linear-gradient(to right, #C9A84C, #d4b96a);
+  color: #fff;
+  font-weight: 600;
+  border: none;
+  border-radius: 12px;
+  padding: 12px 24px;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  box-shadow: 0 2px 8px rgba(201, 168, 76, 0.3);
+}
+.btn-primary:hover {
+  background: linear-gradient(to right, #b8963f, #C9A84C);
+  box-shadow: 0 4px 16px rgba(201, 168, 76, 0.45);
+  transform: translateY(-1px);
+}
 
+/* Shimmer gold animation for buttons */
+.shimmer-gold {
+  background: linear-gradient(110deg, #C9A84C 0%, #d4b96a 25%, #e8d08a 50%, #d4b96a 75%, #C9A84C 100%);
+  background-size: 200% 100%;
+  animation: shimmer 3s ease-in-out infinite;
+  color: #0A1628;
+  font-weight: 700;
+  border: none;
+  box-shadow: 0 4px 16px rgba(201, 168, 76, 0.35);
+}
+
+.shimmer-gold:hover {
+  box-shadow: 0 6px 24px rgba(201, 168, 76, 0.5);
+}
+
+@keyframes shimmer {
+  0% { background-position: 200% 0; }
+  100% { background-position: -200% 0; }
+}
+
+/* Airbnb-style category scrollbar */
+.category-scroll {
+  scrollbar-width: none;
+  -ms-overflow-style: none;
+}
+.category-scroll::-webkit-scrollbar {
+  display: none;
+}
+
+/* Hotel card image hover zoom */
+.hotel-card-img {
+  transition: transform 0.3s ease;
+}
+.hotel-card:hover .hotel-card-img {
+  transform: scale(1.05);
+}
+
+/* Heart animation */
+@keyframes heart-pop {
+  0% { transform: scale(1); }
+  50% { transform: scale(1.2); }
+  100% { transform: scale(1); }
+}
+.heart-animate {
+  animation: heart-pop 0.3s ease;
+}
+
+/* Glass effects kept for admin/hotel dashboards */
 @utility glass {
   background: rgba(255, 255, 255, 0.08);
   @apply backdrop-blur-[16px];
@@ -179,39 +241,32 @@
 }
 
 @utility glass-nav {
-  background: rgba(10, 22, 40, 0.75);
+  background: rgba(255, 255, 255, 0.95);
   @apply backdrop-blur-2xl;
-  border-bottom: 1px solid rgba(255, 255, 255, 0.06);
+  border-bottom: 1px solid rgba(0, 0, 0, 0.06);
   transition: background 0.3s ease;
 }
 
-/* Gold glow effect */
-.glow-gold {
-  box-shadow: 0 0 20px rgba(201, 168, 76, 0.3), 0 0 60px rgba(201, 168, 76, 0.1);
+.glass-nav.scrolled {
+  background: rgba(255, 255, 255, 0.98);
+  border-bottom: 1px solid rgba(0, 0, 0, 0.1);
+  box-shadow: 0 1px 12px rgba(0, 0, 0, 0.06);
 }
 
-/* Shimmer gold animation for buttons */
-.shimmer-gold {
-  background: linear-gradient(110deg, #C9A84C 0%, #d4b96a 25%, #e8d08a 50%, #d4b96a 75%, #C9A84C 100%);
-  background-size: 200% 100%;
-  animation: shimmer 3s ease-in-out infinite;
-  color: #0A1628;
-  font-weight: 700;
-  border: none;
-  box-shadow: 0 4px 16px rgba(201, 168, 76, 0.35);
+@utility glass-green {
+  background: rgba(34, 197, 94, 0.2);
+  @apply backdrop-blur-[12px];
+  border: 1px solid rgba(34, 197, 94, 0.3);
+  box-shadow: 0 4px 16px rgba(34, 197, 94, 0.15);
+  color: #22c55e;
 }
 
-.shimmer-gold:hover {
-  box-shadow: 0 6px 24px rgba(201, 168, 76, 0.5);
-}
-
-@keyframes shimmer {
-  0% {
-    background-position: 200% 0;
-  }
-  100% {
-    background-position: -200% 0;
-  }
+@utility glass-red {
+  background: rgba(239, 68, 68, 0.15);
+  @apply backdrop-blur-[12px];
+  border: 1px solid rgba(239, 68, 68, 0.25);
+  box-shadow: 0 4px 16px rgba(239, 68, 68, 0.1);
+  color: #ef4444;
 }
 
 @utility glass-pill {
@@ -232,47 +287,14 @@
   color: #C9A84C;
 }
 
-/* Glass separator */
-.glass-separator {
-  border-bottom: 1px solid rgba(255, 255, 255, 0.06);
-}
-
-@utility glass-green {
-  background: rgba(34, 197, 94, 0.2);
-  @apply backdrop-blur-[12px];
-  border: 1px solid rgba(34, 197, 94, 0.3);
-  box-shadow: 0 4px 16px rgba(34, 197, 94, 0.15);
-  color: #22c55e;
-}
-
-.glass-green:hover {
-  background: rgba(34, 197, 94, 0.3);
-  box-shadow: 0 6px 24px rgba(34, 197, 94, 0.25);
-}
-
-@utility glass-red {
-  background: rgba(239, 68, 68, 0.15);
-  @apply backdrop-blur-[12px];
-  border: 1px solid rgba(239, 68, 68, 0.25);
-  box-shadow: 0 4px 16px rgba(239, 68, 68, 0.1);
-  color: #ef4444;
-}
-
-.glass-red:hover {
-  background: rgba(239, 68, 68, 0.25);
-  box-shadow: 0 6px 24px rgba(239, 68, 68, 0.2);
-}
-
-/* Scrolled nav state */
-.glass-nav.scrolled {
-  background: rgba(10, 22, 40, 0.95);
-  border-bottom: 1px solid rgba(255, 255, 255, 0.1);
-}
-
 @utility bg-glass-gradient {
   background: linear-gradient(135deg, #0A1628 0%, #132240 50%, #0e1d35 100%);
 }
 
 @utility bg-glass-gradient-light {
   background: linear-gradient(180deg, #f0f4f8 0%, #e8edf4 50%, #f0f4f8 100%);
+}
+
+.glass-separator {
+  border-bottom: 1px solid rgba(255, 255, 255, 0.06);
 }

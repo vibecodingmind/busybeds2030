@@ -3,6 +3,7 @@
 import { useState } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
+import Image from "next/image";
 import { BedDouble, Eye, EyeOff, Loader2, Mail, CheckCircle2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -51,6 +52,7 @@ export default function RegisterPage() {
     e.preventDefault();
     if (!validate()) return;
     setLoading(true);
+
     try {
       const res = await fetch("/api/auth/register", {
         method: "POST",
@@ -62,16 +64,17 @@ export default function RegisterPage() {
           password: form.password,
         }),
       });
+
       const data = await res.json();
+
       if (!res.ok) {
         toast.error(data.error || "Registration failed");
         return;
       }
 
-      // Show success message asking user to verify email
       setRegisteredEmail(form.email);
       setRegistrationSuccess(true);
-      toast.success("Account created! Please check your email to verify your account.");
+      toast.success("Account created! Please check your email to verify.");
     } catch {
       toast.error("Something went wrong. Please try again.");
     } finally {
@@ -80,7 +83,6 @@ export default function RegisterPage() {
   };
 
   const handleResendVerification = async () => {
-    if (!registeredEmail) return;
     setResendLoading(true);
     try {
       const res = await fetch("/api/auth/resend-verification", {
@@ -89,13 +91,9 @@ export default function RegisterPage() {
         body: JSON.stringify({ email: registeredEmail }),
       });
       const data = await res.json();
-      if (res.status === 429) {
-        toast.error(data.error || "Please wait before requesting another email");
-      } else {
-        toast.success("Verification email resent! Check your inbox.");
-      }
+      toast.success(data.message || "Verification email sent!");
     } catch {
-      toast.error("Failed to resend verification email");
+      toast.error("Failed to resend verification email.");
     } finally {
       setResendLoading(false);
     }
@@ -104,69 +102,37 @@ export default function RegisterPage() {
   const updateField = (field: string, value: string) => {
     setForm((prev) => ({ ...prev, [field]: value }));
     if (errors[field]) {
-      setErrors((prev) => {
-        const next = { ...prev };
-        delete next[field];
-        return next;
-      });
+      setErrors((prev) => { const next = { ...prev }; delete next[field]; return next; });
     }
   };
 
-  // Show success state after registration
   if (registrationSuccess) {
     return (
-      <div className="relative flex min-h-[calc(100vh-64px)] items-center justify-center overflow-hidden bg-glass-gradient px-4 py-8">
-        <div className="pointer-events-none absolute -top-32 right-1/4 h-96 w-96 rounded-full bg-[#C9A84C]/10 blur-[100px] float" />
-        <div className="pointer-events-none absolute -bottom-32 left-1/4 h-80 w-80 rounded-full bg-[#C9A84C]/8 blur-[80px] float" style={{ animationDelay: "2s" }} />
-
-        <div className="relative z-10 w-full max-w-md">
-          <div className="mb-8 text-center">
-            <span className="inline-flex items-center gap-2.5">
-              <BedDouble className="h-7 w-7 text-[#C9A84C] drop-shadow-[0_0_12px_rgba(201,168,76,0.4)]" />
-              <span className="text-xl font-bold text-[#C9A84C] drop-shadow-[0_0_20px_rgba(201,168,76,0.3)]">
-                BusyBeds
-              </span>
-            </span>
+      <div className="flex min-h-[calc(100vh-80px)] items-center justify-center bg-white px-4">
+        <div className="w-full max-w-md text-center">
+          <div className="mx-auto mb-6 flex h-16 w-16 items-center justify-center rounded-full bg-green-50">
+            <CheckCircle2 className="h-8 w-8 text-green-500" />
           </div>
-
-          <div className="glass-card-dark rounded-2xl p-8 text-center">
-            <CheckCircle2 className="mx-auto h-16 w-16 text-green-400" />
-            <h1 className="mt-4 text-2xl font-bold text-white">
-              Check Your Email
-            </h1>
-            <p className="mt-2 text-sm text-white/50">
-              We&apos;ve sent a verification email to
-            </p>
-            <p className="mt-1 text-sm font-medium text-[#C9A84C]">
-              {registeredEmail}
-            </p>
-            <p className="mt-4 text-sm text-white/50">
-              Please click the link in the email to verify your account before logging in.
-              The link expires in 24 hours.
-            </p>
-
-            <div className="mt-6 space-y-3">
-              <Button
-                variant="outline"
-                className="w-full border-white/10 text-white/70 hover:bg-white/5 hover:text-white"
-                onClick={handleResendVerification}
-                disabled={resendLoading}
-              >
-                {resendLoading ? (
-                  <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                ) : (
-                  <Mail className="mr-2 h-4 w-4" />
-                )}
-                Resend Verification Email
-              </Button>
-
-              <Button
-                className="w-full shimmer-gold text-[#0A1628] hover:bg-[#C9A84C]/90"
-                onClick={() => router.push("/login")}
-              >
-                Go to Login
-              </Button>
-            </div>
+          <h1 className="text-2xl font-bold text-[#222222]">Check Your Email</h1>
+          <p className="mt-2 text-gray-500">
+            We&apos;ve sent a verification link to <strong className="text-[#222222]">{registeredEmail}</strong>
+          </p>
+          <p className="mt-1 text-sm text-gray-400">Click the link in the email to verify your account, then log in.</p>
+          <div className="mt-6 space-y-3">
+            <Button
+              className="w-full h-12 bg-[#C9A84C] hover:bg-[#b8963f] text-white font-semibold rounded-xl"
+              onClick={() => router.push("/login?registered=true")}
+            >
+              Go to Login
+            </Button>
+            <Button
+              variant="outline"
+              className="w-full h-12 rounded-xl border-gray-300"
+              onClick={handleResendVerification}
+              disabled={resendLoading}
+            >
+              {resendLoading ? <><Loader2 className="mr-2 h-4 w-4 animate-spin" />Sending...</> : "Resend Verification Email"}
+            </Button>
           </div>
         </div>
       </div>
@@ -174,74 +140,77 @@ export default function RegisterPage() {
   }
 
   return (
-    <div className="relative flex min-h-[calc(100vh-64px)] items-center justify-center overflow-hidden bg-glass-gradient px-4 py-8">
-      {/* Background orbs */}
-      <div className="pointer-events-none absolute -top-32 right-1/4 h-96 w-96 rounded-full bg-[#C9A84C]/10 blur-[100px] float" />
-      <div className="pointer-events-none absolute -bottom-32 left-1/4 h-80 w-80 rounded-full bg-[#C9A84C]/8 blur-[80px] float" style={{ animationDelay: "2s" }} />
-
-      <div className="relative z-10 w-full max-w-md">
-        {/* Logo */}
-        <div className="mb-8 text-center">
-          <span className="inline-flex items-center gap-2.5">
-            <BedDouble className="h-7 w-7 text-[#C9A84C] drop-shadow-[0_0_12px_rgba(201,168,76,0.4)]" />
-            <span className="text-xl font-bold text-[#C9A84C] drop-shadow-[0_0_20px_rgba(201,168,76,0.3)]">
-              BusyBeds
-            </span>
-          </span>
+    <div className="relative flex min-h-[calc(100vh-80px)]">
+      {/* Left side - Image */}
+      <div className="hidden lg:block lg:w-1/2 relative">
+        <Image
+          src="/images/hotels/hotel-zanzibar.png"
+          alt="Zanzibar Beach Resort"
+          fill
+          className="object-cover"
+          priority
+        />
+        <div className="absolute inset-0 bg-gradient-to-r from-white/20 to-transparent" />
+        <div className="absolute bottom-12 left-12 right-12">
+          <h2 className="text-3xl font-bold text-white mb-2">Start Saving Today</h2>
+          <p className="text-white/90">Join BusyBeds and unlock exclusive hotel discounts across East Africa</p>
         </div>
+      </div>
 
-        {/* Glass Card */}
-        <div className="glass-card-dark rounded-2xl p-8">
-          <div className="mb-6 text-center">
-            <h1 className="text-2xl font-bold text-white">Create Your Account</h1>
-            <p className="mt-1 text-sm text-white/50">
-              Join BusyBeds and start saving on luxury hotels
-            </p>
+      {/* Right side - Form */}
+      <div className="flex flex-1 items-center justify-center px-4 py-12 bg-white lg:px-12">
+        <div className="w-full max-w-md">
+          <div className="mb-8">
+            <Link href="/" className="inline-flex items-center gap-2 mb-8">
+              <BedDouble className="h-8 w-8 text-[#C9A84C]" />
+              <span className="text-2xl font-bold text-[#222222]">BusyBeds</span>
+            </Link>
+            <h1 className="text-2xl font-bold text-[#222222]">Create your account</h1>
+            <p className="mt-1 text-gray-500">Start saving on luxury hotels across East Africa</p>
           </div>
 
-          <form onSubmit={handleSubmit} className="space-y-4">
+          <form onSubmit={handleSubmit} className="space-y-5">
             <div className="space-y-2">
-              <Label htmlFor="name" className="text-white/70">Full Name</Label>
+              <Label htmlFor="name" className="text-[#222222]">Full Name</Label>
               <Input
                 id="name"
                 placeholder="John Doe"
                 value={form.name}
                 onChange={(e) => updateField("name", e.target.value)}
-                className="h-11 rounded-xl border-white/10 bg-white/5 text-white placeholder:text-white/30 focus:border-[#C9A84C]/50 focus:bg-white/10"
+                className="h-12 rounded-xl border-gray-300 text-[#222222] placeholder:text-gray-400 focus:border-[#C9A84C] focus:ring-[#C9A84C]"
                 disabled={loading}
               />
-              {errors.name && <p className="text-sm text-red-400">{errors.name}</p>}
+              {errors.name && <p className="text-sm text-red-500">{errors.name}</p>}
             </div>
 
             <div className="space-y-2">
-              <Label htmlFor="email" className="text-white/70">Email Address</Label>
+              <Label htmlFor="email" className="text-[#222222]">Email Address</Label>
               <Input
                 id="email"
                 type="email"
                 placeholder="john@example.com"
                 value={form.email}
                 onChange={(e) => updateField("email", e.target.value)}
-                className="h-11 rounded-xl border-white/10 bg-white/5 text-white placeholder:text-white/30 focus:border-[#C9A84C]/50 focus:bg-white/10"
+                className="h-12 rounded-xl border-gray-300 text-[#222222] placeholder:text-gray-400 focus:border-[#C9A84C] focus:ring-[#C9A84C]"
                 disabled={loading}
               />
-              {errors.email && <p className="text-sm text-red-400">{errors.email}</p>}
+              {errors.email && <p className="text-sm text-red-500">{errors.email}</p>}
             </div>
 
             <div className="space-y-2">
-              <Label htmlFor="phone" className="text-white/70">Phone Number (Optional)</Label>
+              <Label htmlFor="phone" className="text-[#222222]">Phone (Optional)</Label>
               <Input
                 id="phone"
-                type="tel"
                 placeholder="+255 123 456 789"
                 value={form.phone}
                 onChange={(e) => updateField("phone", e.target.value)}
-                className="h-11 rounded-xl border-white/10 bg-white/5 text-white placeholder:text-white/30 focus:border-[#C9A84C]/50 focus:bg-white/10"
+                className="h-12 rounded-xl border-gray-300 text-[#222222] placeholder:text-gray-400 focus:border-[#C9A84C] focus:ring-[#C9A84C]"
                 disabled={loading}
               />
             </div>
 
             <div className="space-y-2">
-              <Label htmlFor="password" className="text-white/70">Password</Label>
+              <Label htmlFor="password" className="text-[#222222]">Password</Label>
               <div className="relative">
                 <Input
                   id="password"
@@ -249,97 +218,79 @@ export default function RegisterPage() {
                   placeholder="At least 8 characters"
                   value={form.password}
                   onChange={(e) => updateField("password", e.target.value)}
-                  className="h-11 rounded-xl border-white/10 bg-white/5 pr-10 text-white placeholder:text-white/30 focus:border-[#C9A84C]/50 focus:bg-white/10"
+                  className="h-12 rounded-xl border-gray-300 pr-10 text-[#222222] placeholder:text-gray-400 focus:border-[#C9A84C] focus:ring-[#C9A84C]"
                   disabled={loading}
                 />
                 <Button
                   type="button"
                   variant="ghost"
                   size="icon"
-                  className="absolute right-1 top-1/2 h-9 w-9 -translate-y-1/2 text-white/40 hover:text-white/70"
+                  className="absolute right-1 top-1/2 h-9 w-9 -translate-y-1/2 text-gray-400 hover:text-gray-600"
                   onClick={() => setShowPassword(!showPassword)}
                 >
                   {showPassword ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
                 </Button>
               </div>
-              {errors.password && <p className="text-sm text-red-400">{errors.password}</p>}
+              {errors.password && <p className="text-sm text-red-500">{errors.password}</p>}
             </div>
 
             <div className="space-y-2">
-              <Label htmlFor="confirmPassword" className="text-white/70">Confirm Password</Label>
+              <Label htmlFor="confirmPassword" className="text-[#222222]">Confirm Password</Label>
               <div className="relative">
                 <Input
                   id="confirmPassword"
                   type={showConfirm ? "text" : "password"}
-                  placeholder="Re-enter your password"
+                  placeholder="Repeat your password"
                   value={form.confirmPassword}
                   onChange={(e) => updateField("confirmPassword", e.target.value)}
-                  className="h-11 rounded-xl border-white/10 bg-white/5 pr-10 text-white placeholder:text-white/30 focus:border-[#C9A84C]/50 focus:bg-white/10"
+                  className="h-12 rounded-xl border-gray-300 pr-10 text-[#222222] placeholder:text-gray-400 focus:border-[#C9A84C] focus:ring-[#C9A84C]"
                   disabled={loading}
                 />
                 <Button
                   type="button"
                   variant="ghost"
                   size="icon"
-                  className="absolute right-1 top-1/2 h-9 w-9 -translate-y-1/2 text-white/40 hover:text-white/70"
+                  className="absolute right-1 top-1/2 h-9 w-9 -translate-y-1/2 text-gray-400 hover:text-gray-600"
                   onClick={() => setShowConfirm(!showConfirm)}
                 >
                   {showConfirm ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
                 </Button>
               </div>
-              {errors.confirmPassword && <p className="text-sm text-red-400">{errors.confirmPassword}</p>}
+              {errors.confirmPassword && <p className="text-sm text-red-500">{errors.confirmPassword}</p>}
             </div>
 
-            <div className="space-y-2">
-              <div className="flex items-start gap-2">
-                <Checkbox
-                  id="terms"
-                  checked={termsAccepted}
-                  onCheckedChange={(checked) => {
-                    setTermsAccepted(checked === true);
-                    if (errors.terms) {
-                      setErrors((prev) => {
-                        const next = { ...prev };
-                        delete next.terms;
-                        return next;
-                      });
-                    }
-                  }}
-                  className="mt-1 border-white/20"
-                  disabled={loading}
-                />
-                <Label htmlFor="terms" className="text-sm leading-snug text-white/50">
-                  I agree to the{" "}
-                  <span className="text-[#C9A84C] underline cursor-pointer">Terms of Service</span>{" "}
-                  and{" "}
-                  <span className="text-[#C9A84C] underline cursor-pointer">Privacy Policy</span>
-                </Label>
-              </div>
-              {errors.terms && <p className="text-sm text-red-400">{errors.terms}</p>}
+            <div className="flex items-start gap-2">
+              <Checkbox
+                id="terms"
+                checked={termsAccepted}
+                onCheckedChange={(checked) => {
+                  setTermsAccepted(checked as boolean);
+                  if (errors.terms) setErrors((prev) => { const next = { ...prev }; delete next.terms; return next; });
+                }}
+                className="mt-1"
+              />
+              <label htmlFor="terms" className="text-sm text-gray-500">
+                I agree to the{" "}
+                <Link href="/terms" className="text-[#C9A84C] hover:underline">Terms of Service</Link>
+                {" "}and{" "}
+                <Link href="/privacy" className="text-[#C9A84C] hover:underline">Privacy Policy</Link>
+              </label>
             </div>
+            {errors.terms && <p className="text-sm text-red-500">{errors.terms}</p>}
 
             <Button
               type="submit"
-              className="h-12 w-full rounded-xl shimmer-gold text-base"
+              className="h-12 w-full rounded-xl bg-[#C9A84C] hover:bg-[#b8963f] text-white font-semibold text-base"
               disabled={loading}
             >
-              {loading ? (
-                <>
-                  <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                  Creating Account...
-                </>
-              ) : (
-                "Create Account"
-              )}
+              {loading ? <><Loader2 className="mr-2 h-4 w-4 animate-spin" />Creating Account...</> : "Create Account"}
             </Button>
           </form>
 
-          <div className="mt-6 text-center">
-            <p className="text-sm text-white/40">
+          <div className="mt-8 text-center">
+            <p className="text-sm text-gray-500">
               Already have an account?{" "}
-              <Link href="/login" className="font-medium text-[#C9A84C] hover:text-[#d4b96a] transition-colors">
-                Log In
-              </Link>
+              <Link href="/login" className="font-medium text-[#C9A84C] hover:text-[#b8963f]">Log In</Link>
             </p>
           </div>
         </div>

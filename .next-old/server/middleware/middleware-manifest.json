@@ -1,0 +1,84 @@
+{
+  "sorted_middleware": [],
+  "middleware": {
+    "/": {
+      "files": [
+        "server/edge/chunks/node_modules_next_dist_esm_build_templates_edge-wrapper_0_kjzx3.js",
+        "server/edge/chunks/[root-of-the-server]__1xgicyf._.js",
+        "server/edge/chunks/turbopack-node_modules_next_dist_esm_build_templates_edge-wrapper_1-viiz3.js"
+      ],
+      "name": "middleware",
+      "page": "/",
+      "entrypoint": "server/edge/chunks/turbopack-node_modules_next_dist_esm_build_templates_edge-wrapper_1-viiz3.js",
+      "matchers": [
+        {
+          "regexp": "/:nextData(_next/data/[^/]{1,})?/dashboard/:path*{(\\.json|\\.rsc|\\.segments/.+\\.segment\\.rsc)}?",
+          "originalSource": "/dashboard/:path*"
+        },
+        {
+          "regexp": "/:nextData(_next/data/[^/]{1,})?/coupons/:path*{(\\.json|\\.rsc|\\.segments/.+\\.segment\\.rsc)}?",
+          "originalSource": "/coupons/:path*"
+        },
+        {
+          "regexp": "/:nextData(_next/data/[^/]{1,})?/subscription/:path*{(\\.json|\\.rsc|\\.segments/.+\\.segment\\.rsc)}?",
+          "originalSource": "/subscription/:path*"
+        },
+        {
+          "regexp": "/:nextData(_next/data/[^/]{1,})?/bookings/:path*{(\\.json|\\.rsc|\\.segments/.+\\.segment\\.rsc)}?",
+          "originalSource": "/bookings/:path*"
+        },
+        {
+          "regexp": "/:nextData(_next/data/[^/]{1,})?/hotel/:path*{(\\.json|\\.rsc|\\.segments/.+\\.segment\\.rsc)}?",
+          "originalSource": "/hotel/:path*"
+        },
+        {
+          "regexp": "/:nextData(_next/data/[^/]{1,})?/admin/:path*{(\\.json|\\.rsc|\\.segments/.+\\.segment\\.rsc)}?",
+          "originalSource": "/admin/:path*"
+        },
+        {
+          "regexp": "/:nextData(_next/data/[^/]{1,})?/api/subscription/:path*{(\\.json|\\.rsc|\\.segments/.+\\.segment\\.rsc)}?",
+          "originalSource": "/api/subscription/:path*"
+        },
+        {
+          "regexp": "/:nextData(_next/data/[^/]{1,})?/api/coupons/:path*{(\\.json|\\.rsc|\\.segments/.+\\.segment\\.rsc)}?",
+          "originalSource": "/api/coupons/:path*"
+        },
+        {
+          "regexp": "/:nextData(_next/data/[^/]{1,})?/api/hotel/:path*{(\\.json|\\.rsc|\\.segments/.+\\.segment\\.rsc)}?",
+          "originalSource": "/api/hotel/:path*"
+        },
+        {
+          "regexp": "/:nextData(_next/data/[^/]{1,})?/api/admin/:path*{(\\.json|\\.rsc|\\.segments/.+\\.segment\\.rsc)}?",
+          "originalSource": "/api/admin/:path*"
+        },
+        {
+          "regexp": "/:nextData(_next/data/[^/]{1,})?/api/auth/:path*{(\\.json|\\.rsc|\\.segments/.+\\.segment\\.rsc)}?",
+          "originalSource": "/api/auth/:path*"
+        },
+        {
+          "regexp": "/:nextData(_next/data/[^/]{1,})?/api/payment/:path*{(\\.json|\\.rsc|\\.segments/.+\\.segment\\.rsc)}?",
+          "originalSource": "/api/payment/:path*"
+        },
+        {
+          "regexp": "/:nextData(_next/data/[^/]{1,})?/reset-password/:path*{(\\.json|\\.rsc|\\.segments/.+\\.segment\\.rsc)}?",
+          "originalSource": "/reset-password/:path*"
+        },
+        {
+          "regexp": "/:nextData(_next/data/[^/]{1,})?/payment/callback/:path*{(\\.json|\\.rsc|\\.segments/.+\\.segment\\.rsc)}?",
+          "originalSource": "/payment/callback/:path*"
+        }
+      ],
+      "wasm": [],
+      "assets": [],
+      "env": {
+        "__NEXT_BUILD_ID": "Z_14syNVkgF_KrLYEtRIr",
+        "NEXT_SERVER_ACTIONS_ENCRYPTION_KEY": "KgZkf4aHwjF35V+imqEEwepCObBh5imMD2b+QQgpia0=",
+        "__NEXT_PREVIEW_MODE_ID": "be7cd62b1186da3b1929585aa0472966",
+        "__NEXT_PREVIEW_MODE_ENCRYPTION_KEY": "99daf423cc8de772518edc629cd8a424bbf865f46e0bd363cd315a968002fa7d",
+        "__NEXT_PREVIEW_MODE_SIGNING_KEY": "ade4a43fa3b8387dacdbcc0e3d8cce7a0f5e62a25fbd5f4144da51573fe4c712"
+      }
+    }
+  },
+  "instrumentation": null,
+  "functions": {}
+}
